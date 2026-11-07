@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> **Repo ini ditulis oleh AI.** Diagnosis, skrip, dan dokumentasi dibuat oleh pemilik repo bersama **agen AI** (DeepSeek V4.1 Flash via OpenCode), lalu diperiksa terhadap log yang direkam.
+>
+> **Mau debug HP sendiri pakai repo ini?** Berikan **seluruh repo dan dokumentasinya** — `README.md`, `README.id.md`, `docs/00`–`docs/11`, `evidence/`, dan `scripts/` — ke asisten AI kamu, lalu minta ia mengikuti panduan ini langkah demi langkah. Setelah itu **selalu cek** setiap klaimnya dengan `getprop` dan `logcat` sebelum menjalankan apa pun. Anggap output AI sebagai titik awal yang kuat, bukan otoritas.
+
 # Moto G45 5G bootloop — diagnosis lengkap, perbaikan, dan panduan pemulihan
 
 **Bahasa Indonesia** · [English](README.md)
@@ -11,8 +16,6 @@
 Repo ini adalah tulisan yang sudah disanitasi dan bisa direproduksi dari satu perangkat: apa yang rusak, kenapa, apa yang kami coba, apa yang berhasil, apa yang **tidak**, dan cara melindungi data sebelum wipe.
 
 > **Tidak berafiliasi dengan Motorola, Qualcomm, atau Google.** Semua isi di sini berasal dari satu perangkat ditambah pengetahuan umum Android/Qualcomm. Baca [Penafian](#penafian) sebelum menjalankan apa pun.
-
-> **Ditulis bersama AI.** Diagnosis, skrip, dan dokumentasi repo ini dibuat oleh pemilik repo bersama **agen AI** (DeepSeek V4.1 Flash via OpenCode). Bukti perangkatnya asli; teks dan analisisnya disusun dengan bantuan AI lalu diperiksa terhadap log yang direkam. Artinya: anggap ini **titik awal yang kuat, bukan otoritas**. Setiap klaim teknis bisa dicek di [`evidence/`](evidence/). Detail lengkap: [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md).
 
 ---
 

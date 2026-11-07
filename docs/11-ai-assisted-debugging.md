@@ -2,6 +2,8 @@
 
 This repo was diagnosed and written with an AI coding agent in the loop. This page explains **how to use an AI assistant on your own phone**, what to feed it, what not to feed it, and the mistakes we made so you don't repeat them.
 
+> **Using an AI right now?** Hand it **this whole repository** — `README.md`, `docs/00`–`docs/11`, `evidence/`, `scripts/` — and tell it to follow this guide step by step. Then verify every claim it makes against real output before running anything.
+
 > **The AI cannot see your phone.** It cannot run `adb`, flash firmware, or verify that a package name exists. It is a very fast reader of logs and a very confident guesser. You are the one with the device, the cable and the responsibility.
 
 ---

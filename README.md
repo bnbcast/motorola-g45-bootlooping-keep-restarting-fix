@@ -1,3 +1,8 @@
+> [!IMPORTANT]
+> **This repository was written by AI.** The diagnosis, scripts and documentation were produced by the repository owner working with an **AI coding agent** (DeepSeek V4.1 Flash via OpenCode), then checked against the captured logs.
+>
+> **Want to debug your own phone with it?** Give your AI assistant **this whole repository and its full documentation** — `README.md`, `docs/00`–`docs/11`, `evidence/`, and `scripts/` — and tell it to follow the guide step by step. Then **always verify** what it says against `getprop` and `logcat` before you run anything. Treat AI output as a strong starting point, never as authority.
+
 # Moto G45 5G bootloop full diagnosis, fix and recovery guide
 
 **English** · [Bahasa Indonesia](README.id.md)
@@ -11,8 +16,6 @@
 This repository is the sanitised, reproducible write-up of one device's recovery: what broke, why, what we tried, what worked, what did **not**, and how to protect your data before you wipe.
 
 > **Not affiliated with Motorola, Qualcomm or Google.** Everything here is from a single device plus general Android/Qualcomm knowledge. Read [DISCLAIMER](#disclaimer) before running anything.
-
-> **Co-authored with AI.** The diagnosis, scripts and documentation were produced by the repository owner working with an **AI coding agent** (DeepSeek V4.1 Flash via OpenCode). The device evidence is real; the analysis and prose were drafted with AI and then checked against the captured logs. Treat this as a **strong starting point, not an authority** — every claim is checkable in [`evidence/`](evidence/). How to do the same on your own phone, including the mistakes we made: [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md).
 
 ---
 
