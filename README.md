@@ -1,4 +1,4 @@
-# Moto G45 5G bootloop — full diagnosis, fix and recovery guide
+# Moto G45 5G bootloop full diagnosis, fix and recovery guide
 
 **Device:** Motorola Moto G45 5G · `XT2363-9` · codename **`fogos`** · Snapdragon 6s Gen 3 (`SM6375`)
 **Symptom:** phone reboots every **~2 minutes**, forever, and it survived three different firmware flashes
