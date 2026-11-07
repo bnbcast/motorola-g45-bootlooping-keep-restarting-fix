@@ -1,5 +1,7 @@
 # Moto G45 5G bootloop full diagnosis, fix and recovery guide
 
+**English** · [Bahasa Indonesia](README.id.md)
+
 **Device:** Motorola Moto G45 5G · `XT2363-9` · codename **`fogos`** · Snapdragon 6s Gen 3 (`SM6375`)
 **Symptom:** phone reboots every **~2 minutes**, forever, and it survived three different firmware flashes
 **Root cause:** a **use-after-free in Motorola's proprietary oemhook library**, triggered by **stale modem/telephony state in `/data`**
@@ -9,6 +11,8 @@
 This repository is the sanitised, reproducible write-up of one device's recovery: what broke, why, what we tried, what worked, what did **not**, and how to protect your data before you wipe.
 
 > **Not affiliated with Motorola, Qualcomm or Google.** Everything here is from a single device plus general Android/Qualcomm knowledge. Read [DISCLAIMER](#disclaimer) before running anything.
+
+> **Co-authored with AI.** The diagnosis, scripts and documentation were produced by the repository owner working with an **AI coding agent** (DeepSeek V4.1 Flash via OpenCode). The device evidence is real; the analysis and prose were drafted with AI and then checked against the captured logs. Treat this as a **strong starting point, not an authority** — every claim is checkable in [`evidence/`](evidence/). How to do the same on your own phone, including the mistakes we made: [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md).
 
 ---
 
@@ -91,10 +95,75 @@ Full analysis, including why the popular "factory reset clears modem NVRAM" expl
 
 ---
 
+## Debug it with AI + ADB
+
+This repository was diagnosed with an AI assistant in the loop, and we recommend the same approach — with guardrails. **The AI cannot see your phone.** It cannot run `adb`, flash firmware, or verify a package name. You supply the evidence; you verify the result.
+
+### What to give it
+
+Capture these while the phone is up, then attach the files:
+
+```bash
+adb devices
+adb shell getprop > props.txt
+adb shell 'logcat -d -b crash' > crash.txt
+adb shell 'dumpsys telephony.registry' > telephony.txt
+adb shell 'dumpsys connectivity' > connectivity.txt
+adb shell 'ls -l /data/tombstones' > tombstones.txt
+```
+
+Or run [`scripts/adb/collect-evidence`](scripts/adb/) once and let it grab everything before the reboot.
+
+> **Tombstones persist across reboots.** If the loop is too fast to catch `logcat` live, pull `/data/tombstones` instead. It is the single most useful trick in this guide.
+
+### Prompt template
+
+```text
+You are helping me debug an Android device over ADB. Do not guess.
+
+Device: Motorola Moto G45 5G (XT2363-9, codename fogos, SM6375)
+Build: <ro.build.fingerprint>
+Baseband: <gsm.version.baseband>
+Symptom: <one sentence, with timings>
+Uptime before reboot: <seconds>
+
+Attached: crash.txt, props.txt, telephony.txt, connectivity.txt
+
+Rules:
+1. Start with read-only commands only. No erase, no flash, no uninstall.
+2. For every claim, quote the exact line from the files that supports it.
+3. If the evidence is insufficient, say what to capture next.
+4. Give me one hypothesis at a time, with a prediction I can test.
+5. Tell me what would prove you wrong.
+```
+
+### Rules that keep it honest
+
+1. **Read-only first.** `getprop`, `logcat`, `dumpsys` — no writes until the failure is understood.
+2. **One change per test.** Change three things and you learn nothing.
+3. **Demand citations.** If it cannot quote a log line, it is guessing.
+4. **Ask "what would prove you wrong?"** If the answer is "nothing", discard it.
+5. **Sanitise before pasting.** Serials, IMEIs, phone numbers, SSIDs, account names — see [`PRIVACY.md`](PRIVACY.md).
+6. **Verify with time, not a reboot.** 10+ minutes uptime and `qcrilNrd` crashes = 0.
+
+### What we got wrong
+
+The full list, with the lesson for each, is in [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md). The short version:
+
+- Flashing firmware cannot fix a bug that lives in `/data` — three flashes failed.
+- The "factory reset clears modem NVRAM" story is wrong; recovery does not touch `modemst1/2`.
+- Disabling packages reduced the crash rate but did not remove the cause — apps are senders, not the trigger.
+- Racing `logcat` in a 2-minute window loses; persistent tombstones win.
+- Burning the boot window on the lock screen wastes the whole window.
+- `fastboot erase modemst1/modemst2` risks permanent IMEI loss for no proven benefit.
+
+---
+
 ## Repository map
 
 ```
-README.md                     you are here
+README.md                     you are here (English)
+README.id.md                  Bahasa Indonesia
 docs/
   00-requirements.md          PC, cable, ADB, drivers, accounts, pre-flight checklist
   01-symptoms.md              recognise this bootloop vs. other causes
@@ -107,6 +176,7 @@ docs/
   08-hardening.md             OPTIONAL debloat + stability monitoring
   09-faq.md                   "can it come back?", warranty, root, LineageOS...
   10-evidence-index.md        what is in evidence/ and how it was sanitised
+  11-ai-assisted-debugging.md debug with AI + ADB, prompts, and our mistakes
 scripts/
   adb/                        portable .ps1 + .sh: collect, disable, re-enable, verify
   windows/                    tether keeper + watchdog (path-parameterised)
@@ -142,3 +212,16 @@ Flashing, wiping and `pm disable-user` can brick a device or void warranty. This
 ## Contributing
 
 Corrections, additional `fogos` builds, or reports of the same crash signature are welcome. Please open an issue with your **build fingerprint**, **baseband version** and a **`logcat -b crash` excerpt** — and scrub your serial/IMEI first. See [`PRIVACY.md`](PRIVACY.md) for the redaction checklist used here.
+
+---
+
+## AI co-authorship
+
+This repository was written by the owner together with an **AI coding agent** (DeepSeek V4.1 Flash via OpenCode). The split is roughly:
+
+- **Human:** owns the device, ran every command, made every destructive decision, verified the outcome.
+- **AI:** read the logs, proposed hypotheses, wrote the scripts and the documentation, and was wrong more than once.
+
+We are disclosing this because AI-assisted debugging is useful and should be normalised — but also because **AI output needs verification**. The evidence is published so you can check the reasoning instead of trusting it. See [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md) for the workflow, the prompts, and the mistakes.
+
+If you use AI on your own device: verify every claim against `getprop`/`logcat`, sanitise logs before sharing them, and never let it talk you into `erase`, `flash`, or `uninstall` without a stated reason.

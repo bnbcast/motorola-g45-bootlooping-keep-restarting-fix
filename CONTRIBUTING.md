@@ -10,7 +10,7 @@ Corrections and additional data points are welcome. This repo exists because one
 - **A correction** to the root-cause reasoning — especially evidence for or against the `/data/vendor/radio` explanation.
 - **A confirmed fix path** that differs from this one, with before/after verification.
 - **Script fixes** (PowerShell 5.1 compatibility, macOS/Linux, better error handling).
-- **Translation** of the tutorial into another language.
+- **Translation** of the tutorial into another language. (Indonesian already exists: [`README.id.md`](README.id.md) — more are welcome.)
 
 ## What to include in a bug report
 
@@ -45,6 +45,7 @@ See [`PRIVACY.md`](PRIVACY.md) for the exact checklist.
 3. Test on PowerShell 5.1 (Windows) if you touch `.ps1`.
 4. If you add evidence, sanitise it first and add a row to `evidence/README.md`.
 5. Do not commit `.crypt*`, `*.log`, `props.txt`, `capture/` or anything in `.gitignore`.
+6. If you used AI to write or debug a contribution, that is fine — but say so in the PR, and verify every technical claim against real output. Unverified AI output will be sent back.
 
 ## Style
 
