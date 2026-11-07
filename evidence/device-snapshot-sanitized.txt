@@ -1,0 +1,122 @@
+Device snapshot — sanitised
+Moto G45 5G (XT2363-9, codename fogos)
+Captured at the "stable checkpoint" during the incident, Android 14, before the
+Android 15 flash and before the factory reset.
+
+SANITISATION APPLIED:
+  - ro.serialno / ro.boot.serialno / ro.vendor.boot.serialno -> <SERIAL>
+  - account cache keys, Bluetooth device name, saved Wi-Fi hashes -> removed
+  - personal app list and UI dumps -> not included
+  - carrier names retained (relevant to reproduction)
+  - local file paths -> removed
+
+================================================================================
+IDENTITY
+================================================================================
+ro.product.manufacturer        motorola
+ro.product.brand               motorola
+ro.product.model               moto g45 5G
+ro.product.device              fogos
+ro.product.name                fogos_gpn
+ro.boot.hardware.sku           XT2363-9
+ro.boot.hardware               qcom
+ro.boot.hardware.revision      pvt
+ro.hardware                    qcom
+ro.board.platform              holi
+ro.soc.model                   SM6375
+ro.hardware.egl                adreno
+
+================================================================================
+BUILD (at checkpoint)
+================================================================================
+ro.build.display.id            U1UG34.23-110-35
+ro.build.id                    U1UG34.23-110-35
+ro.build.version.release       14
+ro.build.version.sdk           34
+ro.build.version.security_patch 2024-11-01
+ro.build.date                  Fri Nov 29 12:19:45 UTC 2024
+ro.build.type                  user
+ro.build.tags                  release-keys
+ro.build.fingerprint           motorola/fogos_gpn/fogos:14/U1UG34.23-110-35/a1cf4-d651b9:user/release-keys
+ro.vendor.build.fingerprint    motorola/fogos_g/fogos:11/U1UG34.23-110-35/a1cf4:user/release-keys
+
+================================================================================
+BOOT / SECURITY
+================================================================================
+ro.boot.bootloader             MBM-3.0-uefi-fbb55c9a981-241130-U1UG34.23-110-35-a1cf4
+ro.boot.flash.locked           1          (bootloader locked)
+ro.boot.verifiedbootstate      green      (verified boot intact)
+ro.secure                      1
+ro.debuggable                  0          (not rooted, user build)
+ro.boot.bootreason             watchdog   (previous boot ended in a watchdog kill)
+
+================================================================================
+MODEM / RADIO
+================================================================================
+gsm.version.baseband           M6375_HI434_03.562.01.98R FOGOS_PVT_APEM2DSDS_CUST
+gsm.version.baseband1          M6375_HI434_03.562.01.98R FOGOS_PVT_APEM2DSDS_CUST
+vendor.ril.gsm.version.baseband M6375_HI434_03.562.01.98R
+persist.radio.multisim.config  dsds
+persist.radio.airplane_mode_on 1          (set by the workaround)
+gsm.sim.state                  NOT_READY,NOT_READY   (broken state)
+gsm.network.type               (empty)
+gsm.operator.numeric           (empty)
+gsm.sim.operator.alpha         AXIS,XL Axiata
+gsm.sim.operator.numeric       51011,51011
+gsm.sim.operator.iso-country   id,id
+
+================================================================================
+NETWORK / CONNECTIVITY
+================================================================================
+Active default network        none
+Wi-Fi                          HAL never initialised; no wlan0
+WifiSelfRecovery               WifiNative Failure
+cnss-daemon                    Failed to get WLAN MAC address
+wifi_on                        3 (enabled in settings, but not functional)
+airplane_mode_on               1
+
+================================================================================
+SETTINGS APPLIED BY THE WORKAROUND
+================================================================================
+airplane_mode_on               1
+wifi_on                        0
+wifi_scan_always_enabled       0
+ble_scan_always_enabled        0
+network_recommendations_enabled 0
+window_animation_scale         0
+transition_animation_scale     0
+animator_duration_scale        0
+screen_off_timeout             1800000
+svc power stayon usb           enabled
+
+================================================================================
+PACKAGES DISABLED AT CHECKPOINT (13, the oemhook clients)
+================================================================================
+com.motorola.omadm.service
+com.qualcomm.qti.cne
+com.motorola.hiddenmenuapp
+com.motorola.carriersettingsext
+com.motorola.msimsettings
+com.motorola.entitlement
+com.motorola.genie
+com.motorola.ccc.notification
+com.motorola.moto
+com.qualcomm.qti.uimGbaApp
+com.qualcomm.qti.remoteSimlockAuth
+com.motorola.help
+com.motorola.wifi.motowifimetrics
+
+================================================================================
+POST-RESET VERIFICATION (after the fix, Android 15)
+================================================================================
+uptime                         1608 s (26.8 min)
+qcrilNrd crashes               0
+boot reason                    reboot (normal)
+gsm.sim.state                  ABSENT,LOADED
+gsm.network.type               LTE
+Active default network         102 (native mobile data)
+HTTP check                     204
+HTTPS check                    200
+Android version                15
+build                          V1UGS35H.75-14-9-3-1-4
+all 13 packages                re-enabled, still stable

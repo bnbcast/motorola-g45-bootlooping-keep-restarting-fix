@@ -1,0 +1,126 @@
+﻿ADB reverse-tether watchdog log (sanitised excerpt)
+Source: tether-watchdog.ps1 running on the PC during the crash loop.
+Shows the reboot cadence: device drops, ADB server resets, tunnel rebuilds.
+Timestamps are local (WIB). No personal data present; the account URL opened by
+the watchdog has been replaced with a placeholder.
+20:57:34 device dropped (reboot) - re-arming
+21:00:10 no device for 30s - resetting adb server
+21:00:42 no device for 60s - resetting adb server
+21:01:02 device online
+21:01:03 tunnel missing -> restarting relay/client
+21:01:12 VPN tunnel UP
+21:01:34 device dropped (reboot) - re-arming
+21:02:05 no device for 30s - resetting adb server
+21:02:37 no device for 60s - resetting adb server
+21:03:10 no device for 90s - resetting adb server
+21:03:43 no device for 120s - resetting adb server
+21:04:15 no device for 150s - resetting adb server
+21:04:48 no device for 180s - resetting adb server
+21:05:21 no device for 210s - resetting adb server
+21:05:53 no device for 240s - resetting adb server
+21:06:26 no device for 270s - resetting adb server
+21:06:35 device online
+21:06:53 tunnel missing -> restarting relay/client
+21:07:01 VPN tunnel still down
+21:07:07 device dropped (reboot) - re-arming
+21:07:37 no device for 30s - resetting adb server
+21:08:10 no device for 60s - resetting adb server
+21:08:42 no device for 90s - resetting adb server
+21:09:15 no device for 120s - resetting adb server
+21:09:57 no device for 150s - resetting adb server
+21:10:21 device online
+21:10:22 tunnel missing -> restarting relay/client
+21:10:31 VPN tunnel UP
+21:11:59 device dropped (reboot) - re-arming
+21:12:29 no device for 30s - resetting adb server
+21:13:02 no device for 60s - resetting adb server
+21:13:34 no device for 90s - resetting adb server
+21:14:07 no device for 120s - resetting adb server
+21:14:40 no device for 150s - resetting adb server
+21:15:25 no device for 30s - resetting adb server
+21:15:58 no device for 60s - resetting adb server
+21:16:31 no device for 90s - resetting adb server
+21:17:03 no device for 120s - resetting adb server
+21:17:36 no device for 150s - resetting adb server
+21:18:08 no device for 180s - resetting adb server
+21:18:41 no device for 210s - resetting adb server
+21:19:13 no device for 240s - resetting adb server
+21:19:46 no device for 270s - resetting adb server
+21:20:19 no device for 300s - resetting adb server
+21:20:51 no device for 330s - resetting adb server
+21:21:24 no device for 360s - resetting adb server
+21:21:57 no device for 390s - resetting adb server
+21:22:29 no device for 420s - resetting adb server
+21:23:02 no device for 450s - resetting adb server
+21:23:35 no device for 480s - resetting adb server
+21:24:07 no device for 510s - resetting adb server
+21:24:40 no device for 540s - resetting adb server
+21:25:12 no device for 570s - resetting adb server
+21:25:45 no device for 600s - resetting adb server
+21:26:17 no device for 630s - resetting adb server
+21:26:50 no device for 660s - resetting adb server
+21:27:22 no device for 690s - resetting adb server
+21:27:55 no device for 720s - resetting adb server
+21:28:28 no device for 750s - resetting adb server
+21:29:00 no device for 780s - resetting adb server
+21:29:33 no device for 810s - resetting adb server
+21:30:05 no device for 840s - resetting adb server
+21:30:25 device online
+21:30:26 tunnel missing -> restarting relay/client
+21:30:35 VPN tunnel UP
+21:30:39 opened <account-security-page> in Chrome
+21:31:17 device dropped (reboot) - re-arming
+21:31:48 no device for 30s - resetting adb server
+21:32:23 no device for 60s - resetting adb server
+21:32:55 no device for 90s - resetting adb server
+21:33:02 device online
+21:33:03 tunnel missing -> restarting relay/client
+21:33:16 device online
+21:33:25 opened account screen: com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity
+21:33:25 native Gmail + account screen launched
+21:33:45 device dropped (reboot) - re-arming
+21:34:36 no device for 30s - resetting adb server
+21:34:56 device online
+21:35:06 tunnel missing -> restarting relay/client
+21:35:14 VPN tunnel UP
+21:35:15 opened account screen: com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity
+21:35:15 native Gmail + account screen launched
+21:36:55 device dropped (reboot) - re-arming
+21:37:43 no device for 30s - resetting adb server
+21:38:02 device online
+21:38:11 tunnel missing -> restarting relay/client
+21:38:19 VPN tunnel UP
+21:38:23 internet validated (204)
+21:38:23 opened account screen: com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity
+21:38:23 native Gmail + account screen launched
+21:39:46 device dropped (reboot) - re-arming
+21:40:37 no device for 30s - resetting adb server
+21:41:10 no device for 60s - resetting adb server
+21:41:42 no device for 90s - resetting adb server
+21:42:15 no device for 120s - resetting adb server
+21:42:47 no device for 150s - resetting adb server
+21:43:20 no device for 180s - resetting adb server
+21:43:53 no device for 210s - resetting adb server
+21:44:06 device online
+21:44:16 internet validated (204)
+21:44:17 opened account screen: com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity
+21:44:17 opened Chrome security page + native Gmail/account screen
+21:46:26 tunnel missing -> restarting relay/client
+21:46:40 VPN tunnel still down
+21:46:45 device dropped (reboot) - re-arming
+21:47:25 no device for 30s - resetting adb server
+21:47:58 no device for 60s - resetting adb server
+21:48:30 no device for 90s - resetting adb server
+21:49:03 no device for 120s - resetting adb server
+21:49:36 no device for 150s - resetting adb server
+21:50:08 no device for 180s - resetting adb server
+21:50:41 no device for 210s - resetting adb server
+21:51:14 no device for 240s - resetting adb server
+21:51:43 device online
+21:51:52 internet validated (204)
+21:51:52 default network: none -> restarting VPN app
+21:52:11 default network STILL none
+21:52:12 opened account screen: com.google.android.gms/.auth.uiflows.minutemaid.MinuteMaidActivity
+21:52:12 opened Chrome security page (foreground) + native Gmail/account screen
+22:17:11 connectivity check failed (000) -> rebuild tunnel
+

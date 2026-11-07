@@ -1,0 +1,71 @@
+# Optional debloat list — Moto G45 5G (fogos)
+# NOT part of the bootloop fix. See docs/08-hardening.md before using.
+#
+# Format: TIER | package | note
+# Tiers:
+#   A = safe / cosmetic
+#   B = optional, may remove a feature you use
+#   C = DO NOT DISABLE (listed for reference only)
+#
+# Apply with: .\debloat-optional.ps1 -TierA
+# Rollback:   .\debloat-optional.ps1 -Rollback
+
+A | com.facebook.appmanager                    | Meta app updater
+A | com.facebook.services                      | Meta background services
+A | com.facebook.system                        | Meta system stub
+A | com.facebook.katana                        | Facebook
+A | com.google.android.apps.youtube.music      | YouTube Music
+A | com.google.android.apps.googleassistant    | Google Assistant
+A | com.google.android.videos                  | Google TV / Play Movies
+A | com.google.android.apps.nbu.files          | Files by Google
+A | com.motorola.motocare                       | Moto Care
+A | com.motorola.help                           | Moto Help
+A | com.motorola.help.extlog                    | Moto Help log uploader
+A | com.motorola.demo                           | Retail demo mode
+A | com.motorola.mobiledesktop                  | Ready For / desktop mode
+A | com.motorola.mobiledesktop.core             | Ready For core
+A | com.motorola.bug2go                         | Bug reporting
+A | com.motorola.aiservices                     | Moto AI services
+A | com.motorola.genie                          | Moto assistant
+A | com.motorola.motocit                        | Hardware diagnostics (CIT)
+A | com.motorola.appforecast                    | App prediction
+A | com.motorola.lifetimedata                   | Usage telemetry
+A | com.motorola.bach.modemstats                | Modem stats uploader
+A | com.motorola.dciservice                     | Device care
+A | com.motorola.nfwlocationattribution         | Location attribution
+A | com.motorola.revoker.services               | Permission revoker
+A | com.motorola.appdirectedsmsproxy            | App-directed SMS proxy
+A | com.motorola.wifi.motowifimetrics           | Wi-Fi metrics uploader
+A | com.ertanto.kompas.official                 | Preinstalled local news app
+A | id.mjs.etalaseapp                           | Preinstalled local store app
+
+B | com.android.chrome                          | browser / WebView provider - check WebView first
+B | com.motorola.ccc.ota                        | OTA client - disabling stops updates
+B | com.motorola.ccc.notification               | OTA notifier
+B | com.motorola.ccc.devicemanagement           | enterprise/MDM
+B | com.motorola.omadm.service                  | carrier provisioning (OMADM)
+B | com.qualcomm.qti.uimGbaApp                  | GBA authentication
+B | com.qualcomm.qti.remoteSimlockAuth          | remote SIM lock
+B | com.motorola.entitlement                    | carrier entitlement checks
+B | com.motorola.msimsettings                   | multi-SIM settings
+B | com.motorola.carriersettingsext             | carrier config extensions
+B | com.motorola.paks                           | Moto account services
+B | com.motorola.rcsConfigService               | RCS configuration
+B | com.motorola.carrierconfig                  | carrier config
+B | com.oem.euiccpartnerapp.overlay.retca       | eSIM partner overlay
+B | com.google.android.gms.supervision          | Family Link supervision
+B | com.motorola.motosignature.app              | Moto signature
+B | com.motorola.motosignature2.app             | Moto signature
+
+C | com.qualcomm.qti.telephonyservice           | core telephony
+C | com.qualcomm.qti.uim                        | SIM/UIM stack
+C | com.qualcomm.qti.dynamicddsservice          | dynamic dual-SIM
+C | com.qualcomm.qti.uceShimService             | RCS/UCE shim
+C | com.android.cellbroadcastservice.overlay    | EMERGENCY ALERTS
+C | com.android.cellbroadcast.overlay           | EMERGENCY ALERTS
+C | com.motorola.att.phone.extensions           | carrier telephony extension
+C | com.android.providers.telephony             | telephony provider
+C | com.android.phone                            | phone app
+C | com.android.server.telecom                   | telecom service
+C | com.google.android.gms                       | Play services
+C | com.google.android.gsf                       | Google services framework

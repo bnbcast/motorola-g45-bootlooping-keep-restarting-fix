@@ -1,0 +1,55 @@
+# --- never publish these ---------------------------------------------
+# WhatsApp / app backups
+*.crypt1*
+*.crypt12
+*.crypt13
+*.crypt14
+*.crypt15
+msgstore.db
+wa.db
+*.db.crypt*
+
+# Device dumps that contain identifiers
+props.txt
+settings-*.txt
+device-snapshot.txt
+logcat-*.txt
+dumpsys-*.txt
+bugreport*.zip
+tombstones/
+capture/
+crash-before-fix.txt
+props-before-fix.txt
+
+# Personal media / screenshots
+last_shot.png
+Screenshot_*.png
+*.jpeg
+*.jpg
+*.webp
+*.mp4
+*.mkv
+
+# ...but the curated, sanitised repo assets are allowed
+!assets/*.png
+
+# Backups
+phone-backup/
+backup/
+*.zip
+*.7z
+*.tar
+*.tar.gz
+
+# Script logs (may contain paths / SSIDs)
+*.log
+debloat-log-*.txt
+
+# --- tooling ----------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+__pycache__/
+node_modules/

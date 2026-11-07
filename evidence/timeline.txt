@@ -1,0 +1,138 @@
+Timeline — Moto G45 5G (XT2363-9 / fogos)
+Times are local (WIB, UTC+7). Serial redacted.
+
+--------------------------------------------------------------------------------
+2026-11-05 14:49  HEALTHY BASELINE
+--------------------------------------------------------------------------------
+  Both SIMs registered: XL Axiata (slot 0), AXIS (slot 1)
+  Mobile data: working, LTE
+  Wi-Fi: working
+  Baseband: M6375_HI434_03.562.01.98R FOGOS_PVT_APEM2DSDS_CUST
+
+--------------------------------------------------------------------------------
+2026-11-05 ~16:43  THE 60 SECONDS BEFORE THE LOOP
+--------------------------------------------------------------------------------
+  Observed order of failure:
+    1. SIM signal disappears
+    2. Mobile data stops
+    3. Wi-Fi disappears
+    4. Hotspot cannot be enabled
+    5. ~1 minute later: first reboot
+    6. Reboot loop, every ~1.5-3 minutes
+  Interpretation: modem/RIL layer failed FIRST. Wi-Fi and the rest fell over
+  afterwards because they share the wedged system_server/telephony stack.
+  This ordering is evidence against a battery/storage hardware fault.
+
+--------------------------------------------------------------------------------
+2026-11-05 ~16:45  CRASH LOOP CONFIRMED
+--------------------------------------------------------------------------------
+  qcrilNrd crashes ~14x per boot, one every ~8 s
+  Reboot every ~1.5-3 min, bootreason alternating watchdog / kernel_panic
+  Wi-Fi HAL never initialises: "WifiSelfRecovery: WifiNative Failure"
+  gsm.sim.state = NOT_READY,NOT_READY
+  Active default network: none
+  Evidence: evidence/crash-signature.txt
+
+--------------------------------------------------------------------------------
+2026-11-05 20:00-22:00  EMERGENCY INTERVENTION
+--------------------------------------------------------------------------------
+  1. 13 packages disabled (oemhook clients):
+       com.motorola.omadm.service
+       com.qualcomm.qti.cne
+       com.motorola.hiddenmenuapp
+       com.motorola.carriersettingsext
+       com.motorola.msimsettings
+       com.motorola.entitlement
+       com.motorola.genie
+       com.motorola.ccc.notification
+       com.motorola.moto
+       com.qualcomm.qti.uimGbaApp
+       com.qualcomm.qti.remoteSimlockAuth
+       com.motorola.help
+       com.motorola.wifi.motowifimetrics
+  2. airplane_mode_on=1, wifi_on=0
+  3. gnirehtet ADB reverse tether -> internet over USB from the PC
+  4. Watchdog v2: auto-reconnect, quiet radio, trim apps
+  Result: crashes 14 -> ~2 per boot. Still looping. No Wi-Fi, no SIM, no data,
+  no hotspot.
+  Evidence: evidence/tether-log-sanitized.txt, evidence/device-snapshot-sanitized.txt
+
+--------------------------------------------------------------------------------
+2026-11-05 21:00-22:00  BACKUP UNDER FIRE
+--------------------------------------------------------------------------------
+  Backup script ran in a retry loop against the reboot interval:
+    - DCIM, images, videos, games folders copied piece by piece across boots
+    - WhatsApp .crypt14 databases copied to PC (49 MB)
+    - Gmail / account data backed up over the gnirehtet tunnel
+  The reboot interval (1.5-3 min) set the effective batch size; each boot
+  copied whatever it could before the next watchdog kill.
+
+--------------------------------------------------------------------------------
+2026-11-06 01:38  ANDROID 15 OTA DETECTED
+--------------------------------------------------------------------------------
+  Version V1UG35H.75-14-4 (1.97 GB), step 3 of 6, 37% complete
+  Status: "Software download interrupted. We'll keep trying... Check Wi-Fi settings"
+
+--------------------------------------------------------------------------------
+2026-11-06 14:00-17:00  CRASH ANALYSIS
+--------------------------------------------------------------------------------
+  Signature isolated: libqcrilNr.so <- libmotext_inf.so (Motorola oemhook client)
+  Unsolicited indications identified: RegRAT, UpdateOperator, DataState,
+  APMState, VoiceCallCountAndWfcFlag
+
+--------------------------------------------------------------------------------
+2026-11-06 18:00  SOFTWARE FIX (LMSA) — LATEST FULL FIRMWARE
+--------------------------------------------------------------------------------
+  Motorola/Lenovo "Software Fix" / Rescue and Smart Assistant
+  Downloaded and flashed the latest firmware for XT2363-9 / fogos
+  Installed Android 15 (V1UGS35H.75-14-9-3-1-4)
+  Bootloop PERSISTED with the identical signature
+
+--------------------------------------------------------------------------------
+2026-11-06 ~19:00  LATEST SECURITY-PATCH BUILD (…-9-13)
+--------------------------------------------------------------------------------
+  Flashed the newest security-patch build available
+  Bootloop PERSISTED, identical signature
+  Interpretation: three different images, same vendor library, same stale
+  userdata -> same crash. This is state, not image corruption.
+
+--------------------------------------------------------------------------------
+2026-11-06 20:00  FACTORY RESET #1 (THE FIX)
+--------------------------------------------------------------------------------
+  Recovery -> Wipe data/factory reset -> Reboot
+  WhatsApp Drive backup triggered before the wipe
+
+--------------------------------------------------------------------------------
+2026-11-06 21:00  POST-RESET VERIFICATION
+--------------------------------------------------------------------------------
+  Uptime: 1608 s (26.8 min), 0 qcrilNrd crashes
+  Boot reason: reboot (normal)
+  gsm.sim.state: ABSENT,LOADED (one SIM, slot 1)
+  gsm.network.type: LTE
+  Active default network: 102 (native mobile data)
+  HTTP 204, HTTPS 200
+  Android 15, build V1UGS35H.75-14-9-3-1-4
+  All 13 packages RE-ENABLED — still stable
+
+--------------------------------------------------------------------------------
+2026-11-06 ~22:00  FACTORY RESET #2 (CONFIRMATION)
+--------------------------------------------------------------------------------
+  Second wipe performed to rule out luck
+  Result: still stable, still 0 crashes, LTE working
+
+--------------------------------------------------------------------------------
+2026-11-07  REBOOT VALIDATION
+--------------------------------------------------------------------------------
+  adb reboot -> clean boot
+  Uptime 1113+ s (18.5+ min), 0 crashes, LTE working
+  ~48 bloatware packages disabled (optional, see docs/08-hardening.md)
+  Conclusion: loop closed
+
+--------------------------------------------------------------------------------
+NOT PROVEN
+--------------------------------------------------------------------------------
+  The exact event that poisoned the RIL token table at 16:43 is unknown.
+  Whether modem NVRAM partitions (modemst1/2, fsg) were affected is unknown —
+  no before/after dump exists. The AP-side /data state explanation is the one
+  best supported by the evidence (it explains why three flashes failed and a
+  wipe succeeded).

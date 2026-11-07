@@ -1,0 +1,77 @@
+Crash signature — Moto G45 5G (XT2363-9 / fogos)
+Captured from /data/tombstones and `logcat -b crash`
+Identical on Android 14 (U1UG34.23-110-35) and Android 15 (V1UGS35H.75-14-9-3-1-4)
+Serial redacted.
+
+================================================================================
+PROCESS
+================================================================================
+pid: <PID>, tid: <TID>, name: qcrilNrd  >>> /vendor/bin/hw/qcrilNrd <<<
+uid: 1001 (radio)
+Cmdline: /vendor/bin/hw/qcrilNrd
+
+================================================================================
+SIGNAL
+================================================================================
+signal 11 (SIGSEGV), code 1 (SEGV_MAPERR), fault addr 0xffffffffffffff02
+Cause: null pointer dereference
+
+    x0  0000000000000000   x1  0000000000000000   x2  0000000000000000
+    x3  0000000000000000   x4  0000000000000000   x5  0000000000000000
+    x6  0000000000000000   x7  0000000000000000   x8  0000000000000000
+    x9  0000000000000000   x10 0000000000000000   x11 0000000000000000
+    x12 0000000000000000   x13 0000000000000000   x14 0000000000000000
+    x15 0000000000000000   x16 0000000000000000   x17 0000000000000000
+    x18 0000000000000000   x19 0000000000000000   x20 0000000000000000
+    x21 0000000000000000   x22 0000000000000000   x23 0000000000000000
+    x24 0000000000000000   x25 0000000000000000   x26 0000000000000000
+    x27 0000000000000000   x28 0000000000000000   x29 0000000000000000
+    sp  0000000000000000   lr  0000000000000000   pc  0000000000000000
+
+    (register dump trimmed: values were not retained in the field capture)
+
+================================================================================
+BACKTRACE
+================================================================================
+      #00 pc <...>  /vendor/lib64/libqcrilNr.so
+                    (qcril_qmi_oem_free_and_convert_ril_token_to_oem_token+56)
+      #01 pc <...>  /vendor/lib64/libqcrilNr.so
+                    (qcril_qmi_oemhook_agent_send+172)
+      #02 pc <...>  /vendor/lib64/libqcrilNr.so
+                    (mot_qcril_qmi_oemhook_agent_send+52)
+      #03 pc <...>  /vendor/lib64/libmotext_inf.so
+                    (communicationThread+1244)          <-- Motorola proprietary
+      #04 pc <...>  /system/lib64/libc.so
+                    (__pthread_start+208)
+      #05 pc <...>  /system/lib64/libc.so
+                    (__start_thread+68)
+
+================================================================================
+INTERPRETATION
+================================================================================
+- fault addr 0xffffffffffffff02 == -254. Not a mapped address. Classic poisoned
+  pointer from a freed token slot.
+- The crash is inside Motorola's oemhook client thread (libmotext_inf.so), which
+  calls into the Qualcomm RIL oemhook agent send path.
+- The token was already freed/invalidated when the send path tried to convert it.
+- qcrilNrd dies -> system_server blocks on Binder -> watchdog reboots after ~60 s.
+
+================================================================================
+TRIGGERING INDICATIONS (observed in logcat -b radio)
+================================================================================
+qcrilUpdRegRAT                     radio access technology change
+qcrilUpdateOperator                operator / PLMN change
+qcrilUpdDataState                  data connection state change
+qcrilUpdAPMState                   airplane mode state change
+qcrilUpdVoiceCallCountAndWfcFlag   call count / Wi-Fi calling flag change
+
+These are normal, high-frequency modem events. On a device with two SIMs
+flapping between LTE/5G they fire every few seconds, which is why the crash
+repeated ~14 times per boot.
+
+================================================================================
+FREQUENCY
+================================================================================
+~14 crashes per boot, one roughly every 8 seconds.
+Watchdog reboot every ~1.5-3 minutes.
+Boot reasons observed: watchdog, kernel_panic.
