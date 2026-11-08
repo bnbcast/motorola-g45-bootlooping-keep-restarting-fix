@@ -9,7 +9,7 @@
   <title>Moto G45 5G Bootloop Fix — Corrupt Modem NV Repair (XT2363-9)</title>
   <meta name="description" content="Fix the Moto G45 5G (XT2363-9) 2-minute bootloop caused by corrupt modem NV in modemst1/modemst2. Unlock bootloader, fastboot erase modemst1 + modemst2, modem rebuilds NV from golden fsg partition. Zero crashes, LTE working, IMEI intact.">
   <meta name="keywords" content="Moto G45 5G bootloop fix, XT2363-9, modemst1 modemst2 erase, qcrilNrd SIGSEGV, corrupt modem NV, fogos, Snapdragon 6s Gen 3, Android 15 bootloop repair">
-  <meta name="author" content="moto-g45-bootloop-fix">
+  <meta name="author" content="bnbcast">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/">
 
@@ -40,7 +40,7 @@
     "license": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/LICENSE",
     "datePublished": "2026-11-08",
     "dateModified": "2026-11-08",
-    "author": {"@type": "Person", "name": "moto-g45-bootloop-fix"},
+    "author": {"@type": "Person", "name": "bnbcast"},
     "keywords": "Moto G45 5G, XT2363-9, bootloop, modem NV, modemst1, modemst2, fastboot erase, qcrilNrd, SIGSEGV, corrupt NV, fsg partition, Android 15, SM6375, Snapdragon 6s Gen 3, fogos, Motorola",
     "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD", "availability": "https://schema.org/InStock"}
   }
@@ -97,7 +97,7 @@
       font-family: var(--font-sans);
       background: var(--bg);
       color: var(--text);
-      line-height: 1.6;
+      line-height: 1.7;
       -webkit-font-smoothing: antialiased;
     }
 
@@ -108,6 +108,15 @@
     .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
     section { padding: 80px 0; border-bottom: 1px solid var(--border); }
     section:last-of-type { border-bottom: none; }
+
+    /* Skip link */
+    .skip-link {
+      position: absolute; top: -100%; left: 24px;
+      background: var(--accent); color: var(--bg);
+      padding: 12px 24px; border-radius: var(--radius);
+      font-weight: 600; z-index: 1000;
+    }
+    .skip-link:focus { top: 24px; }
 
     /* Header / Hero */
     header {
@@ -170,9 +179,7 @@
       margin-top: 32px;
       flex-wrap: wrap;
     }
-    .stat {
-      text-align: center;
-    }
+    .stat { text-align: center; }
     .stat-value {
       font-size: 2rem;
       font-weight: 700;
@@ -228,6 +235,35 @@
     .btn-github { background: #24292f; color: #e6edf3; border: 1px solid #30363d; }
     .btn-github:hover { background: #2d333b; border-color: #484f58; }
 
+    /* Table of Contents */
+    .toc {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 48px;
+      position: sticky;
+      top: 24px;
+    }
+    .toc h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .toc ul { list-style: none; }
+    .toc li { margin: 8px 0; }
+    .toc a {
+      font-size: 0.95rem;
+      color: var(--text-muted);
+      padding: 4px 0;
+      display: block;
+      border-radius: 4px;
+      transition: all var(--transition);
+    }
+    .toc a:hover { color: var(--accent); background: rgba(88,166,255,0.1); padding-left: 8px; text-decoration: none; }
+    .toc a.active { color: var(--accent); font-weight: 500; }
+
     /* Section Headings */
     .section-header { text-align: center; margin-bottom: 48px; }
     .section-header h2 {
@@ -258,6 +294,8 @@
     }
     .card h3 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; }
     .card p { color: var(--text-muted); font-size: 0.95rem; }
+    .card ul { color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; padding-left: 20px; }
+    .card li { margin: 8px 0; }
 
     /* The Fix - Code Block */
     .fix-section { background: var(--bg-elevated); }
@@ -333,6 +371,24 @@
     .verify-text strong { display: block; font-size: 0.95rem; }
     .verify-text span { font-size: 0.8rem; color: var(--text-muted); }
 
+    /* Prerequisites Box */
+    .prereq-box {
+      margin-top: 32px;
+      padding: 24px;
+      background: rgba(210,153,34,0.1);
+      border: 1px solid rgba(210,153,34,0.3);
+      border-radius: var(--radius);
+    }
+    .prereq-box h4 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+      color: var(--warning);
+    }
+    .prereq-box ul { padding-left: 20px; color: var(--text-muted); line-height: 1.9; }
+    .prereq-box li { margin: 10px 0; }
+
     /* FAQ */
     .faq { max-width: 720px; margin: 0 auto; }
     details.faq-item {
@@ -393,6 +449,7 @@
       .btn { width: 100%; justify-content: center; }
       .cta-row { flex-direction: column; }
       .code-body { padding: 16px; font-size: 0.8rem; }
+      .toc { position: static; margin-bottom: 32px; }
     }
 
     /* Reduced motion */
@@ -404,14 +461,14 @@
     /* Focus visible */
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-    /* Skip link */
-    .skip-link {
-      position: absolute; top: -100%; left: 24px;
-      background: var(--accent); color: var(--bg);
-      padding: 12px 24px; border-radius: var(--radius);
-      font-weight: 600; z-index: 1000;
+    /* Print styles */
+    @media print {
+      header, .cta-row, .footer-cta, footer, .toc, .copy-btn { display: none !important; }
+      section { border-bottom: none; page-break-inside: avoid; }
+      body { background: white; color: black; }
+      .code-block { border: 1px solid #ccc; }
+      .code-header { background: #f5f5f5; }
     }
-    .skip-link:focus { top: 24px; }
   </style>
 </head>
 <body>
@@ -450,8 +507,8 @@
           <a href="#the-fix" class="btn btn-primary">
             <i class="fas fa-terminal"></i> View The Fix
           </a>
-          <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix" class="btn btn-github" target="_blank" rel="noopener">
-            <i class="fab fa-github"></i> Full Documentation on GitHub
+          <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix" class="btn btn-github" target="_blank" rel="noopener">
+            <i class="fab fa-github"></i> Full Repository on GitHub
           </a>
           <a href="README.id.md" class="btn btn-secondary">
             <i class="fas fa-globe"></i> Bahasa Indonesia
@@ -462,16 +519,31 @@
   </header>
 
   <main id="main">
+    <!-- Table of Contents -->
+    <div class="container">
+      <nav class="toc" aria-label="Table of contents">
+        <h3><i class="fas fa-list"></i> In This Guide</h3>
+        <ul>
+          <li><a href="#the-problem">The Problem — Why your phone keeps rebooting</a></li>
+          <li><a href="#the-fix">The Fix — Two fastboot commands that work</a></li>
+          <li><a href="#prerequisites">Critical Prerequisites — Read before you start</a></li>
+          <li><a href="#verification">How We Verified It — Not just "it booted once"</a></li>
+          <li><a href="#faq">FAQ — Common questions answered</a></li>
+          <li><a href="#full-docs">Full Documentation — Every step, script, and log</a></li>
+        </ul>
+      </nav>
+    </div>
+
     <section id="the-problem" aria-labelledby="problem-heading">
       <div class="container">
         <div class="section-header">
           <h2 id="problem-heading">The Problem</h2>
-          <p>Your Moto G45 5G reboots every ~2 minutes. Factory resets and firmware flashes don't help. Here's why.</p>
+          <p>Your Moto G45 5G reboots every ~2 minutes. Factory resets and firmware flashes don't help. Here's why — in plain English.</p>
         </div>
         <div class="cards">
           <article class="card">
             <div class="card-icon"><i class="fas fa-sync-alt"></i></div>
-            <h3>Symptom: 2-Minute Bootloop</h3>
+            <h3>Symptom: The 2-Minute Bootloop</h3>
             <p>Phone boots, works for ~2 minutes, then reboots. Repeats forever. Survives OTA updates, LMSA firmware flashes, and factory resets.</p>
           </article>
           <article class="card">
@@ -482,7 +554,7 @@
           <article class="card">
             <div class="card-icon"><i class="fas fa-ban"></i></div>
             <h3>Why Other Fixes Failed</h3>
-            <ul style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; padding-left: 20px;">
+            <ul>
               <li>Firmware flashes (OTA/LMSA) never touch <code>modemst1/2</code></li>
               <li>Factory reset only masks it for ~3 hours (re-provisions modem stack)</li>
               <li>Disabling apps reduces crash rate but doesn't fix the modem</li>
@@ -554,12 +626,12 @@
           </div>
         </div>
 
-        <div style="margin-top: 32px; padding: 20px; background: rgba(210,153,34,0.1); border: 1px solid rgba(210,153,34,0.3); border-radius: var(--radius);">
-          <strong><i class="fas fa-exclamation-triangle"></i> Critical Prerequisites</strong>
-          <ul style="margin-top: 12px; padding-left: 20px; color: var(--text-muted); line-height: 1.8;">
+        <div id="prerequisites" class="prereq-box">
+          <h4><i class="fas fa-exclamation-triangle"></i> Critical Prerequisites — Read These First</h4>
+          <ul>
             <li><strong>Unlockable bootloader</strong> — Motorola only unlocks retail units (XT2363-9 is retail). <code>fastboot erase</code> is refused while locked.</li>
             <li><strong>Record IMEI first</strong> — dial <code>*#06#</code> and write both numbers down. The erase wipes the NV store holding IMEI.</li>
-            <li><strong>Backup before unlock</strong> — unlocking wipes <code>/data</code> (WhatsApp keys, 2FA seeds, everything). See <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/06-backup.md" target="_blank" rel="noopener">backup guide</a>.</li>
+            <li><strong>Backup before unlock</strong> — unlocking wipes <code>/data</code> (WhatsApp keys, 2FA seeds, everything). See <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/06-backup.md" target="_blank" rel="noopener">backup guide</a>.</li>
             <li><strong>Do NOT relock</strong> — relocking a modified boot chain bricks the device.</li>
           </ul>
         </div>
@@ -596,7 +668,7 @@
       <div class="container">
         <div class="section-header">
           <h2 id="faq-heading">FAQ</h2>
-          <p>Quick answers — full details in the <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/09-faq.md" target="_blank" rel="noopener">GitHub FAQ</a>.</p>
+          <p>Quick answers — full details in the <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/09-faq.md" target="_blank" rel="noopener">GitHub FAQ</a>.</p>
         </div>
         <div class="faq">
           <details class="faq-item">
@@ -645,32 +717,32 @@
           <article class="card">
             <div class="card-icon"><i class="fas fa-book"></i></div>
             <h3>Start Here</h3>
-            <p><a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/00-requirements.md" target="_blank" rel="noopener">Requirements & Pre-flight Checklist</a> — PC, cable, ADB, accounts, 2FA seeds, cable test</p>
+            <p><a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/00-requirements.md" target="_blank" rel="noopener">Requirements & Pre-flight Checklist</a> — PC, cable, ADB, accounts, 2FA seeds, cable test</p>
           </article>
           <article class="card">
             <div class="card-icon"><i class="fas fa-stethoscope"></i></div>
             <h3>Diagnose</h3>
-            <p><a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/01-symptoms.md" target="_blank" rel="noopener">Symptoms</a> · <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/02-diagnosis.md" target="_blank" rel="noopener">Evidence Collection</a> · <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/03-root-cause.md" target="_blank" rel="noopener">Root Cause Analysis</a></p>
+            <p><a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/01-symptoms.md" target="_blank" rel="noopener">Symptoms</a> · <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/02-diagnosis.md" target="_blank" rel="noopener">Evidence Collection</a> · <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/03-root-cause.md" target="_blank" rel="noopener">Root Cause Analysis</a></p>
           </article>
           <article class="card">
             <div class="card-icon"><i class="fas fa-tools"></i></div>
             <h3>Fix & Verify</h3>
-            <p><a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/12-confirmed-fix-nv-repair.md" target="_blank" rel="noopener">Confirmed Fix: NV Repair</a> · <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/05-tutorial.md" target="_blank" rel="noopener">Step-by-Step Tutorial</a> · <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/13-restore-verification.md" target="_blank" rel="noopener">Restore Verification</a></p>
+            <p><a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/12-confirmed-fix-nv-repair.md" target="_blank" rel="noopener">Confirmed Fix: NV Repair</a> · <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/05-tutorial.md" target="_blank" rel="noopener">Step-by-Step Tutorial</a> · <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/13-restore-verification.md" target="_blank" rel="noopener">Restore Verification</a></p>
           </article>
           <article class="card">
             <div class="card-icon"><i class="fas fa-robot"></i></div>
             <h3>AI-Assisted Debugging</h3>
-            <p><a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/docs/11-ai-assisted-debugging.md" target="_blank" rel="noopener">How we used AI + ADB</a> — prompts, mistakes, verification rules. <strong>Give your AI this whole repo to debug your phone.</strong></p>
+            <p><a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/11-ai-assisted-debugging.md" target="_blank" rel="noopener">How we used AI + ADB</a> — prompts, mistakes, verification rules. <strong>Give your AI this whole repo to debug your phone.</strong></p>
           </article>
           <article class="card">
             <div class="card-icon"><i class="fas fa-folder-open"></i></div>
             <h3>Scripts & Evidence</h3>
-            <p><a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/tree/main/scripts/adb" target="_blank" rel="noopener">ADB Scripts</a> (collect, verify, debloat) · <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/tree/main/evidence" target="_blank" rel="noopener">Sanitised Logs</a> (crash signature, timeline, device snapshot)</p>
+            <p><a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/tree/main/scripts/adb" target="_blank" rel="noopener">ADB Scripts</a> (collect, verify, debloat) · <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/tree/main/evidence" target="_blank" rel="noopener">Sanitised Logs</a> (crash signature, timeline, device snapshot)</p>
           </article>
           <article class="card">
             <div class="card-icon"><i class="fas fa-shield-alt"></i></div>
             <h3>Safety & Legal</h3>
-            <p><a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy/Redaction Checklist</a> · <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/LICENSE" target="_blank" rel="noopener">MIT / CC BY 4.0</a> · <a href="#disclaimer" target="_blank" rel="noopener">Disclaimer</a></p>
+            <p><a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy/Redaction Checklist</a> · <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/LICENSE" target="_blank" rel="noopener">MIT / CC BY 4.0</a> · <a href="#disclaimer">Disclaimer</a></p>
           </article>
         </div>
       </div>
@@ -680,7 +752,7 @@
       <div class="container">
         <h2 id="cta-heading">Ready to Fix Your Phone?</h2>
         <p>Grab the full guide, scripts, and evidence on GitHub. Read the prerequisites, back up your data, then run the two <code>fastboot erase</code> commands.</p>
-        <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix" class="btn btn-primary" target="_blank" rel="noopener">
+        <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix" class="btn btn-primary" target="_blank" rel="noopener">
           <i class="fab fa-github"></i> View Full Repository on GitHub
         </a>
       </div>
@@ -690,9 +762,9 @@
   <footer id="disclaimer" role="contentinfo">
     <div class="container">
       <div class="footer-links">
-        <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy / Redaction</a>
-        <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT / CC BY 4.0)</a>
-        <a href="https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/issues" target="_blank" rel="noopener">Report Issue</a>
+        <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy / Redaction</a>
+        <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT / CC BY 4.0)</a>
+        <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/issues" target="_blank" rel="noopener">Report Issue</a>
         <a href="README.id.md">Bahasa Indonesia</a>
       </div>
       <p><strong>Disclaimer:</strong> Flashing, wiping, and <code>fastboot erase</code> can brick your device or void warranty. This guide is provided <strong>as-is, with no warranty</strong>. You are responsible for your own device and data. Not affiliated with Motorola, Qualcomm, or Google.</p>
@@ -700,7 +772,7 @@
         <i class="fas fa-robot"></i> This repository was written by the owner together with an <strong>AI coding agent</strong> (DeepSeek V4.1 Flash via OpenCode).
         The evidence is published so you can verify the reasoning instead of trusting it.
       </p>
-      <p style="margin-top: 8px;">© 2026 moto-g45-bootloop-fix. Built with <i class="fas fa-heart" style="color: var(--danger);"></i> for the <code>fogos</code> community.</p>
+      <p style="margin-top: 8px;">© 2026 bnbcast. Built with <i class="fas fa-heart" style="color: var(--danger);"></i> for the <code>fogos</code> community.</p>
     </div>
   </footer>
 
@@ -725,7 +797,7 @@
       });
     }
 
-    // FAQ smooth open/close (optional enhancement)
+    // FAQ smooth open/close
     document.querySelectorAll('details.faq-item').forEach(detail => {
       detail.addEventListener('toggle', () => {
         if (detail.open) {
@@ -743,6 +815,21 @@
       }
     `;
     document.head.appendChild(style);
+
+    // Active TOC link highlighting on scroll
+    const tocLinks = document.querySelectorAll('.toc a');
+    const sections = Array.from(tocLinks).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        const link = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
+        if (link) {
+          link.classList.toggle('active', entry.isIntersecting);
+        }
+      });
+    }, { rootMargin: '-100px 0px -66%', threshold: 0 });
+
+    sections.forEach(section => observer.observe(section));
   </script>
 </body>
 </html>
