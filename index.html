@@ -287,11 +287,35 @@
     .stat-value { font-size: 2.25rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); line-height: 1.1; }
     .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
 
-    /* Table of Contents */
+    /* Layout - Sidebar + Content */
+    .content-wrapper {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    @media (min-width: 1024px) {
+      .content-wrapper {
+        grid-template-columns: 260px 1fr;
+        align-items: start;
+      }
+    }
+
+    /* Table of Contents - Sidebar */
     .toc {
-      position: sticky; top: calc(var(--header-height) + 24px);
       background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 20px 24px; margin: 32px 0 40px; box-shadow: var(--shadow);
+      padding: 20px 24px; box-shadow: var(--shadow);
+    }
+    @media (min-width: 1024px) {
+      .toc {
+        position: sticky; top: calc(var(--header-height) + 24px);
+        max-height: calc(100vh - var(--header-height) - 48px);
+        overflow-y: auto;
+      }
+    }
+    @media (max-width: 1023px) {
+      .toc { margin-bottom: 24px; }
+      .toc-toggle { display: block; }
+      .toc.collapsed ul { display: none; }
     }
     .toc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
     .toc-title { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
@@ -305,14 +329,8 @@
     .toc li a:hover { color: var(--accent); background: var(--accent-light); border-bottom: none; }
     .toc li a.active { color: var(--accent); background: var(--accent-light); }
 
-    @media (max-width: 768px) {
-      .toc { position: static; margin-bottom: 24px; }
-      .toc-toggle { display: block; }
-      .toc.collapsed ul { display: none; }
-    }
-
     /* Article Content */
-    article { max-width: var(--max-width); margin: 0 auto; }
+    article { max-width: 100%; }
     .lead {
       font-size: 1.15rem; line-height: 1.8; color: var(--text-secondary);
       border-left: 3px solid var(--accent); padding-left: 1.5rem; margin: 2rem 0;
@@ -628,27 +646,28 @@
   <!-- Main Content -->
   <main id="main" role="main">
     <div class="container">
+      <div class="content-wrapper">
 
-      <!-- Table of Contents -->
-      <nav class="toc" aria-label="Table of contents" id="toc">
-        <div class="toc-header">
-          <span class="toc-title"><i class="fas fa-list"></i> Contents</span>
-          <button class="toc-toggle" aria-label="Toggle table of contents" onclick="document.getElementById('toc').classList.toggle('collapsed')">
-            <i class="fas fa-chevron-up"></i>
-          </button>
-        </div>
-        <ul>
-          <li><a href="#the-problem">The Problem — Why the phone bootloops</a></li>
-          <li><a href="#root-cause">Root Cause Analysis — What actually fails</a></li>
-          <li><a href="#prerequisites">Prerequisites — What you need before starting</a></li>
-          <li><a href="#the-fix">The Fix Procedure — Step-by-step commands</a></li>
-          <li><a href="#verification">Verification — How to confirm the repair</a></li>
-          <li><a href="#faq">Frequently Asked Questions</a></li>
-          <li><a href="#full-docs">Full Documentation & Resources</a></li>
-        </ul>
-      </nav>
+        <!-- Table of Contents -->
+        <nav class="toc" aria-label="Table of contents" id="toc">
+          <div class="toc-header">
+            <span class="toc-title"><i class="fas fa-list"></i> Contents</span>
+            <button class="toc-toggle" aria-label="Toggle table of contents" onclick="document.getElementById('toc').classList.toggle('collapsed')">
+              <i class="fas fa-chevron-up"></i>
+            </button>
+          </div>
+          <ul>
+            <li><a href="#the-problem">The Problem — Why the phone bootloops</a></li>
+            <li><a href="#root-cause">Root Cause Analysis — What actually fails</a></li>
+            <li><a href="#prerequisites">Prerequisites — What you need before starting</a></li>
+            <li><a href="#the-fix">The Fix Procedure — Step-by-step commands</a></li>
+            <li><a href="#verification">Verification — How to confirm the repair</a></li>
+            <li><a href="#faq">Frequently Asked Questions</a></li>
+            <li><a href="#full-docs">Full Documentation & Resources</a></li>
+          </ul>
+        </nav>
 
-      <article>
+        <article>
 
         <!-- The Problem -->
         <section id="the-problem" class="section">
@@ -1089,6 +1108,7 @@ subsys5: 0</span></code></pre>
 
       </article>
 
+      </div>
     </div>
   </main>
 
