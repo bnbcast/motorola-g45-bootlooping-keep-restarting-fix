@@ -2,8 +2,8 @@
 title: "Moto G45 5G Bootloop Fix — Corrupt Modem NV Repair"
 description: "Complete diagnosis, repair guide, and recovery documentation for the Moto G45 5G (XT2363-9, codename fogos) bootloop caused by corrupt modem NV in modemst1/modemst2. Fix: unlock bootloader, fastboot erase modemst1 + modemst2, modem rebuilds NV from golden fsg partition."
 author: moto-g45-bootloop-fix
-url: "https://moto-g45-bootloop-fix.github.io/moto-g45-bootloop-fix"
-baseurl: "/moto-g45-bootloop-fix"
+url: "https://moto-g45-bootloop-fix.github.io"
+baseurl: ""
 
 # Theme
 theme: minima
@@ -44,6 +44,7 @@ exclude:
   - sitemap.xml
   - robots.txt
   - _config.yml
+  - index.html
 
 # Defaults
 defaults:

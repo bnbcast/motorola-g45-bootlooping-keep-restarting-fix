@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0d1117"/>
+      <stop offset="100%" style="stop-color:#161b22"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#58a6ff"/>
+      <stop offset="100%" style="stop-color:#79b8ff"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Subtle pattern -->
+  <g opacity="0.03">
+    <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#58a6ff" stroke-width="1"/>
+    </pattern>
+    <rect width="1200" height="630" fill="url(#grid)"/>
+  </g>
+
+  <!-- Left accent bar -->
+  <rect x="0" y="0" width="8" height="630" fill="url(#accent)"/>
+
+  <!-- Content -->
+  <g font-family="Inter, system-ui, sans-serif" fill="#e6edf3">
+    <!-- Badge -->
+    <g transform="translate(80, 80)">
+      <rect x="0" y="0" width="280" height="40" rx="20" fill="rgba(88,166,255,0.15)" stroke="rgba(88,166,255,0.3)" stroke-width="1"/>
+      <text x="140" y="27" text-anchor="middle" font-size="14" font-weight="500" fill="#58a6ff">
+        ✓ Verified Fix — Zero Crashes
+      </text>
+    </g>
+
+    <!-- Title -->
+    <text x="80" y="220" font-size="48" font-weight="700" line-height="1.15">
+      <tspan fill="#e6edf3">Moto G45 5G</tspan>
+      <tspan x="80" dy="56" fill="url(#accent)">Bootloop Fix</tspan>
+    </text>
+
+    <!-- Subtitle -->
+    <text x="80" y="320" font-size="20" fill="#8b949e" width="500">
+      Corrupt modem NV in <tspan font-family="monospace" fill="#ff7b72">modemst1</tspan>/<tspan font-family="monospace" fill="#ff7b72">modemst2</tspan> → unlock, erase, rebuild from <tspan font-family="monospace" fill="#3fb950">fsg</tspan>
+    </text>
+
+    <!-- Stats -->
+    <g transform="translate(80, 380)">
+      <g transform="translate(0, 0)">
+        <text x="0" y="0" font-size="36" font-weight="700" font-family="monospace" fill="#58a6ff">0</text>
+        <text x="0" y="30" font-size="14" fill="#8b949e">Modem Crashes</text>
+      </g>
+      <g transform="translate(180, 0)">
+        <text x="0" y="0" font-size="36" font-weight="700" font-family="monospace" fill="#58a6ff">2h+</text>
+        <text x="0" y="30" font-size="14" fill="#8b949e">Uptime Verified</text>
+      </g>
+      <g transform="translate(360, 0)">
+        <text x="0" y="0" font-size="36" font-weight="700" font-family="monospace" fill="#58a6ff">✓</text>
+        <text x="0" y="30" font-size="14" fill="#8b949e">IMEI Intact</text>
+      </g>
+      <g transform="translate(520, 0)">
+        <text x="0" y="0" font-size="36" font-weight="700" font-family="monospace" fill="#58a6ff">9.4 GB</text>
+        <text x="0" y="30" font-size="14" fill="#8b949e">Data Restored</text>
+      </g>
+    </g>
+
+    <!-- Device info -->
+    <text x="80" y="520" font-size="16" fill="#8b949e">
+      Device: <tspan font-family="monospace" fill="#e6edf3">XT2363-9</tspan> · Codename: <tspan font-family="monospace" fill="#e6edf3">fogos</tspan> · SoC: <tspan font-family="monospace" fill="#e6edf3">SM6375</tspan> · Android 15
+    </text>
+
+    <!-- GitHub link -->
+    <g transform="translate(80, 570)">
+      <rect x="0" y="0" width="200" height="36" rx="8" fill="#24292f" stroke="#30363d" stroke-width="1"/>
+      <text x="100" y="23" text-anchor="middle" font-size="14" font-weight="600" fill="#e6edf3">
+        GitHub Repository
+      </text>
+    </g>
+  </g>
+
+  <!-- Right side - code snippet visual -->
+  <g transform="translate(720, 120)" font-family="monospace" font-size="13" fill="#e6edf3">
+    <rect x="0" y="0" width="400" height="380" rx="12" fill="#0d1117" stroke="#30363d" stroke-width="1"/>
+    <!-- Window dots -->
+    <g transform="translate(16, 16)">
+      <circle cx="8" cy="8" r="6" fill="#ff5f57"/>
+      <circle cx="28" cy="8" r="6" fill="#ffbd2e"/>
+      <circle cx="48" cy="8" r="6" fill="#28ca42"/>
+    </g>
+    <!-- Code lines -->
+    <text x="20" y="65" fill="#8b949e"># Record IMEI first (*#06#)</text>
+    <text x="20" y="95" fill="#3fb950">fastboot erase modemst1</text>
+    <text x="20" y="120" fill="#8b949e">OKAY [  0.139s]</text>
+    <text x="20" y="150" fill="#3fb950">fastboot erase modemst2</text>
+    <text x="20" y="175" fill="#8b949e">OKAY [  0.005s]</text>
+    <text x="20" y="205" fill="#3fb950">fastboot reboot</text>
+    <text x="20" y="245" fill="#8b949e"># Verify</text>
+    <text x="20" y="275" fill="#3fb950">adb shell cat subsys2/crash_count</text>
+    <text x="20" y="300" fill="#58a6ff">0</text>
+    <text x="20" y="330" fill="#3fb950">adb shell getprop gsm.version.baseband</text>
+    <text x="20" y="355" fill="#58a6ff">M6375_HI434_03.562.01.121R</text>
+  </g>
+
+  <!-- Footer attribution -->
+  <text x="600" y="610" text-anchor="middle" font-size="11" fill="#484f58" font-family="Inter, system-ui, sans-serif">
+    AI-assisted repair · Verified against logs · Not affiliated with Motorola/Qualcomm/Google
+  </text>
+</svg>
