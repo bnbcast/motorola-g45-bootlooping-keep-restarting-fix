@@ -206,3 +206,25 @@ If any box is unticked, fix that before you start. The unlock itself wipes the p
 - Not sure it is this bug? → [`01-symptoms.md`](01-symptoms.md)
 - Ready to start? → [`05-tutorial.md`](05-tutorial.md)
 - Back up first → [`06-backup.md`](06-backup.md)
+- **Staged restore verified (0 crashes, 9.4 GB)** → [`13-restore-verification.md`](13-restore-verification.md)
+
+---
+
+## Docs index (quick links)
+
+| # | Doc | Purpose |
+|---|-----|---------|
+| 00 | [Requirements](00-requirements.md) | This file — hardware, accounts, software checklist |
+| 01 | [Symptoms](01-symptoms.md) | Bootloop signs, `qcrilNrd` crash, modem assertions |
+| 02 | [Diagnosis](02-diagnosis.md) | Evidence collection, logcat, dropbox, crash counters |
+| 03 | [Root Cause](03-root-cause.md) | **Corrupt modem NV in `modemst1/2`** (corrected theory) |
+| 04 | [Fixes](04-fixes.md) | Ranked: NV erase (1), LMSA full flash (2), factory reset (3, not a fix) |
+| 05 | [Tutorial](05-tutorial.md) | Phase 1 backup → Phase 2 unlock → Phase 3 NV erase |
+| 06 | [Backup](06-backup.md) | `adb pull` shared storage, `meta/` evidence, what to skip |
+| 07 | [Internet without Wi-Fi/SIM](07-internet-without-wifi-or-sim.md) | `gnirehtet` reverse tether |
+| 08 | [Hardening](08-hardening.md) | Post-fix stability, debloat, thermal tuning |
+| 09 | [FAQ](09-faq.md) | Unlock consequences, relock warning, anti-rollback, custom ROMs |
+| 10 | [Evidence Index](10-evidence-index.md) | Sanitized logs, timeline, device snapshot |
+| 11 | [AI-Assisted Debugging](11-ai-assisted-debugging.md) | How the AI co-pilot was used, prompts, verification rules |
+| 12 | [Confirmed Fix: NV Repair](12-confirmed-fix-nv-repair.md) | **Authoritative repair guide** — unlock + erase modemst1/2 |
+| 13 | [Restore Verification](13-restore-verification.md) | **5 stages, 3,452 files, 9.48 GB, 0 crashes** |

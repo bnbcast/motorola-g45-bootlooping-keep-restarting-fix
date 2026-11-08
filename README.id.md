@@ -283,3 +283,43 @@ Koreksi, build `fogos` tambahan, atau laporan crash signature yang sama sangat d
 - Tulisan/dokumentasi: **CC BY 4.0**
 
 Repo ini **ditulis bersama AI**: diagnosis, skrip, dan dokumentasi disusun oleh pemilik repo bersama agen AI, lalu diverifikasi terhadap bukti di [`evidence/`](evidence/). Gunakan AI untuk debug perangkatmu — tapi verifikasi setiap klaim, dan jangan pernah menempel log mentah ke publik.
+
+---
+
+## Data terstruktur (JSON-LD) — untuk mesin pencari
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "Moto G45 5G Bootloop Fix — Perbaikan NV Modem Rusak",
+  "description": "Diagnosis lengkap, panduan perbaikan, dan dokumentasi pemulihan untuk Moto G45 5G (XT2363-9, codename fogos) bootloop akibat NV modem rusak di modemst1/modemst2. Perbaikan: unlock bootloader, fastboot erase modemst1 + modemst2, modem membangun ulang NV dari partisi fsg emas.",
+  "url": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix",
+  "codeRepository": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix",
+  "programmingLanguage": ["PowerShell", "Bash", "Markdown"],
+  "license": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/LICENSE",
+  "datePublished": "2026-11-08",
+  "dateModified": "2026-11-08",
+  "author": {
+    "@type": "Person",
+    "name": "moto-g45-bootloop-fix"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "GitHub",
+    "url": "https://github.com"
+  },
+  "inLanguage": "id",
+  "keywords": "Moto G45 5G, XT2363-9, bootloop, modem NV, modemst1, modemst2, fastboot erase, qcrilNrd, SIGSEGV, corrupt NV, fsg partition, Android 15, SM6375, Snapdragon 6s Gen 3, fogos, Motorola",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix"
+  }
+}
+</script>

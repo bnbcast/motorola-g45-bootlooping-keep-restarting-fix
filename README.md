@@ -240,3 +240,42 @@ This repository was written by the owner together with an **AI coding agent** (D
 We are disclosing this because AI-assisted debugging is useful and should be normalised — but also because **AI output needs verification**. The evidence is published so you can check the reasoning instead of trusting it. See [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md) for the workflow, the prompts, and the mistakes.
 
 If you use AI on your own device: verify every claim against `getprop`/`logcat`, sanitise logs before sharing them, and never let it talk you into `erase`, `flash`, or `uninstall` without a stated reason.
+
+---
+
+## Structured data (JSON-LD) — for search engines
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "Moto G45 5G Bootloop Fix — Corrupt Modem NV Repair",
+  "description": "Complete diagnosis, repair guide, and recovery documentation for the Moto G45 5G (XT2363-9, codename fogos) bootloop caused by corrupt modem NV in modemst1/modemst2. Fix: unlock bootloader, fastboot erase modemst1 + modemst2, modem rebuilds NV from golden fsg partition.",
+  "url": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix",
+  "codeRepository": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix",
+  "programmingLanguage": ["PowerShell", "Bash", "Markdown"],
+  "license": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/blob/main/LICENSE",
+  "datePublished": "2026-11-08",
+  "dateModified": "2026-11-08",
+  "author": {
+    "@type": "Person",
+    "name": "moto-g45-bootloop-fix"
+  },
+  "isPartOf": {
+    "@type": "WebSite",
+    "name": "GitHub",
+    "url": "https://github.com"
+  },
+  "keywords": "Moto G45 5G, XT2363-9, bootloop, modem NV, modemst1, modemst2, fastboot erase, qcrilNrd, SIGSEGV, corrupt NV, fsg partition, Android 15, SM6375, Snapdragon 6s Gen 3, fogos, Motorola",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD",
+    "availability": "https://schema.org/InStock"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix"
+  }
+}
+</script>

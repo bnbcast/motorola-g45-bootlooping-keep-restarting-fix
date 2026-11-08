@@ -1,0 +1,10 @@
+# robots.txt for moto-g45-bootloop-fix
+# Allows indexing of all public docs and READMEs
+
+User-agent: *
+Allow: /
+
+Sitemap: https://github.com/moto-g45-bootloop-fix/moto-g45-bootloop-fix/sitemap.xml
+
+# GitHub Pages renders markdown; these are the canonical URLs
+# No disallow needed — repo is public and intended for search indexing
