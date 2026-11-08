@@ -310,6 +310,8 @@
         position: sticky; top: calc(var(--header-height) + 24px);
         max-height: calc(100vh - var(--header-height) - 48px);
         overflow-y: auto;
+        margin-right: 24px;
+        margin-bottom: 0;
       }
     }
     @media (max-width: 1023px) {
@@ -330,7 +332,7 @@
     .toc li a.active { color: var(--accent); background: var(--accent-light); }
 
     /* Article Content */
-    article { max-width: 100%; }
+    article { max-width: var(--max-width); }
     .lead {
       font-size: 1.15rem; line-height: 1.8; color: var(--text-secondary);
       border-left: 3px solid var(--accent); padding-left: 1.5rem; margin: 2rem 0;
