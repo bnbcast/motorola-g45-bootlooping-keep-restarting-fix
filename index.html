@@ -4,123 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0f172a">
-
-  <!-- Primary SEO -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <title>Moto G45 5G Bootloop Fix — Corrupt Modem NV Repair (XT2363-9)</title>
-  <meta name="description" content="Complete step-by-step repair guide for the Moto G45 5G (XT2363-9) 2-minute bootloop caused by corrupt modem NV in modemst1/modemst2. Fix: unlock bootloader, fastboot erase modemst1 + modemst2, modem rebuilds NV from golden fsg partition. Verified: zero crashes, LTE data & voice working, IMEI intact, 100% data integrity.">
-  <meta name="keywords" content="Moto G45 5G bootloop fix, XT2363-9, modemst1 modemst2 erase, qcrilNrd SIGSEGV, corrupt modem NV, fogos, Snapdragon 6s Gen 3, Android 15 bootloop repair">
-  <meta name="author" content="bnbcast">
-  <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/">
-
-  <!-- Open Graph -->
-  <meta property="og:type" content="article">
-  <meta property="og:title" content="Moto G45 5G Bootloop Fix — Corrupt Modem NV Repair">
-  <meta property="og:description" content="Complete diagnosis and repair guide for the Moto G45 5G (XT2363-9) 2-minute bootloop. Fix: unlock bootloader, erase modemst1/modemst2, modem rebuilds NV from golden fsg partition.">
-  <meta property="og:url" content="https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/">
-  <meta property="og:image" content="https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/og-image.svg">
-  <meta property="og:site_name" content="Moto G45 5G Bootloop Fix">
-  <meta property="article:published_time" content="2026-11-08">
-  <meta property="article:modified_time" content="2026-11-08">
-  <meta property="article:tag" content="Android">
-  <meta property="article:tag" content="Motorola">
-  <meta property="article:tag" content="Bootloop">
-  <meta property="article:tag" content="Modem NV Repair">
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Moto G45 5G Bootloop Fix — Corrupt Modem NV Repair">
-  <meta name="twitter:description" content="Fix the 2-minute bootloop on Moto G45 5G (XT2363-9) by erasing corrupt modem NV partitions. Verified stable with zero crashes.">
-  <meta name="twitter:image" content="https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/og-image.svg">
-
-  <!-- JSON-LD Structured Data -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    "headline": "Moto G45 5G Bootloop Fix — Corrupt Modem NV Repair",
-    "description": "Complete diagnosis and repair guide for the Moto G45 5G (XT2363-9, codename fogos) bootloop caused by corrupt modem NV in modemst1/modemst2.",
-    "url": "https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/",
-    "image": "https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/og-image.svg",
-    "datePublished": "2026-11-08",
-    "dateModified": "2026-11-08",
-    "author": {"@type": "Person", "name": "bnbcast"},
-    "publisher": {"@type": "Organization", "name": "bnbcast", "logo": {"@type": "ImageObject", "url": "https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/og-image.svg"}},
-    "articleSection": "Mobile Repair",
-    "keywords": "Moto G45 5G, XT2363-9, bootloop, modem NV, modemst1, modemst2, fastboot erase, qcrilNrd, SIGSEGV, fsg partition, Android 15, SM6375, Snapdragon 6s Gen 3, fogos",
-    "stepCount": 7,
-    "proficiencyLevel": "Advanced"
-  }
-  </script>
-
-  <!-- Breadcrumb JSON-LD -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {"@type": "ListItem", "position": 1, "name": "Home", "item": "https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/"},
-      {"@type": "ListItem", "position": 2, "name": "Diagnosis", "item": "https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/#the-problem"},
-      {"@type": "ListItem", "position": 3, "name": "The Fix", "item": "https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/#the-fix"},
-      {"@type": "ListItem", "position": 4, "name": "Verification", "item": "https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/#verification"},
-      {"@type": "ListItem", "position": 5, "name": "Full Documentation", "item": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix"}
-    ]
-  }
-  </script>
-
-  <!-- HowTo JSON-LD for the fix procedure -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "HowTo",
-    "name": "Fix Moto G45 5G Bootloop by Erasing Corrupt Modem NV",
-    "description": "Step-by-step procedure to repair the 2-minute bootloop on Moto G45 5G (XT2363-9) by erasing modemst1 and modemst2 partitions.",
-    "totalTime": "PT30M",
-    "estimatedCost": "0",
-    "supply": [
-      {"@type": "HowToSupply", "name": "Windows 10/11 PC with admin rights"},
-      {"@type": "HowToSupply", "name": "USB data cable (not charge-only)"},
-      {"@type": "HowToSupply", "name": "Android SDK Platform-Tools (ADB/Fastboot)"},
-      {"@type": "HowToSupply", "name": "Motorola bootloader unlock code"}
-    ],
-    "tool": [
-      {"@type": "HowToTool", "name": "ADB/Fastboot"},
-      {"@type": "HowToTool", "name": "Motorola LMSA (for unlock)"}
-    ],
-    "step": [
-      {"@type": "HowToStep", "position": 1, "name": "Back up all data", "text": "Unlocking the bootloader wipes /data. Back up WhatsApp keys, 2FA seeds, photos, and all personal data first.", "url": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/06-backup.md"},
-      {"@type": "HowToStep", "position": 2, "name": "Confirm the bug", "text": "Verify 2-minute reboot loop with qcrilNrd SIGSEGV in crash buffer. This confirms corrupt modem NV.", "url": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/01-symptoms.md"},
-      {"@type": "HowToStep", "position": 3, "name": "Record IMEI", "text": "Dial *#06# and write down both IMEI numbers. The repair erases the NV store holding IMEI.", "url": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/12-confirmed-fix-nv-repair.md#record-imei-first"},
-      {"@type": "HowToStep", "position": 4, "name": "Unlock bootloader", "text": "Use Motorola's official unlock portal. This wipes the device. Retail units (XT2363-9) are unlockable.", "url": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/12-confirmed-fix-nv-repair.md#unlocking-the-bootloader"},
-      {"@type": "HowToStep", "position": 5, "name": "Erase modem NV partitions", "text": "Run: fastboot erase modemst1 && fastboot erase modemst2 && fastboot reboot. The modem rebuilds clean NV from the golden fsg partition.", "url": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/12-confirmed-fix-nv-repair.md#the-fix"},
-      {"@type": "HowToStep", "position": 6, "name": "Verify modem stability", "text": "Check: adb shell cat /sys/bus/msm_subsys/devices/subsys2/crash_count returns 0. Baseband present. SIM LOADED.", "url": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/13-restore-verification.md"},
-      {"@type": "HowToStep", "position": 7, "name": "Confirm IMEI and monitor", "text": "Dial *#06# — both IMEIs must match. Monitor uptime for 30+ minutes, then reboot once to confirm persistence.", "url": "https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/13-restore-verification.md"}
-    ]
-  }
-  </script>
-
-  <!-- Preconnect -->
+  <meta name="description" content="Complete step-by-step repair guide for the Moto G45 5G (XT2363-9) 2-minute bootloop caused by corrupt modem NV in modemst1/modemst2. Fix: unlock bootloader, fastboot erase modemst1 + modemst2, modem rebuilds NV from golden fsg partition.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://github.com">
-
-  <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
-  <link rel="alternate icon" href="/favicon.svg">
-  <link rel="apple-touch-icon" href="/favicon.svg">
-
-  <!-- Fonts & Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer">
-
-  <!-- Styles -->
   <style>
     :root {
       --bg: #ffffff;
-      --bg-muted: #f8fafc;
       --bg-card: #ffffff;
       --border: #e2e8f0;
-      --border-strong: #cbd5e1;
       --text: #0f172a;
       --text-secondary: #334155;
       --text-muted: #64748b;
@@ -132,7 +27,6 @@
       --warning: #d97706;
       --warning-light: #fef3c7;
       --danger: #dc2626;
-      --danger-light: #fee2e2;
       --code-bg: #f1f5f9;
       --code-text: #c026d3;
       --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -141,19 +35,13 @@
       --radius: 8px;
       --radius-lg: 12px;
       --shadow: 0 1px 3px rgba(15,23,42,0.08), 0 1px 2px rgba(15,23,42,0.06);
-      --shadow-lg: 0 10px 25px -5px rgba(15,23,42,0.1), 0 8px 10px -6px rgba(15,23,42,0.08);
-      --shadow-xl: 0 20px 40px -10px rgba(15,23,42,0.15);
       --transition: 150ms ease;
-      --header-height: 72px;
     }
-
     @media (prefers-color-scheme: dark) {
       :root {
         --bg: #0b1220;
-        --bg-muted: #111827;
         --bg-card: #111827;
         --border: #1f2937;
-        --border-strong: #374151;
         --text: #f8fafc;
         --text-secondary: #e2e8f0;
         --text-muted: #94a3b8;
@@ -165,25 +53,26 @@
         --warning: #fbbf24;
         --warning-light: #78350f;
         --danger: #f87171;
-        --danger-light: #7f1d1d;
         --code-bg: #1e293b;
         --code-text: #d8b4fe;
-        --shadow: 0 1px 3px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.2);
-        --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.4), 0 8px 10px -6px rgba(0,0,0,0.3);
-        --shadow-xl: 0 20px 40px -10px rgba(0,0,0,0.5);
+        --shadow: 0 1px 3px rgba(0,0,0,0.3);
       }
     }
-
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; scroll-padding-top: 100px; }
+    html { scroll-behavior: smooth; scroll-padding-top: 80px; }
     body {
       font-family: var(--font-sans);
       background: var(--bg);
       color: var(--text);
       line-height: 1.75;
-      -webkit-font-smoothing: antialiased;
       font-size: 16px;
+      -webkit-font-smoothing: antialiased;
     }
+    a { color: var(--accent); text-decoration: none; transition: color var(--transition); }
+    a:hover { color: var(--accent-hover); }
+    code { font-family: var(--font-mono); font-size: 0.92em; background: var(--code-bg); color: var(--code-text); padding: 0.15em 0.45em; border-radius: 4px; }
+    kbd { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); color: var(--text); padding: 0.15em 0.5em; border-radius: 4px; border: 1px solid var(--border); }
+    strong { color: var(--text); font-weight: 600; }
 
     /* Skip link */
     .skip-link {
@@ -195,173 +84,131 @@
     }
     .skip-link:focus { top: 24px; }
 
-    /* Layout */
+    /* Container */
     .container { max-width: var(--max-width); margin: 0 auto; padding: 0 24px; }
-    main { padding: 0 0 80px; }
-
-    /* Typography */
-    h1, h2, h3, h4 { font-weight: 700; line-height: 1.25; color: var(--text); }
-    h1 { font-size: clamp(2rem, 5vw, 2.75rem); letter-spacing: -0.02em; }
-    h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
-    h3 { font-size: 1.25rem; margin-top: 2rem; }
-    h4 { font-size: 1.1rem; margin-top: 1.5rem; }
-    p { margin: 1rem 0; color: var(--text-secondary); }
-    a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; transition: all var(--transition); }
-    a:hover { color: var(--accent-hover); border-bottom-color: var(--accent-hover); }
-    strong { color: var(--text); font-weight: 600; }
-    code { font-family: var(--font-mono); font-size: 0.92em; background: var(--code-bg); color: var(--code-text); padding: 0.15em 0.45em; border-radius: 4px; }
-    pre code { padding: 0; background: none; color: inherit; }
-    kbd { font-family: var(--font-mono); font-size: 0.85em; background: var(--code-bg); color: var(--text); padding: 0.15em 0.5em; border-radius: 4px; border: 1px solid var(--border); box-shadow: 0 1px 0 var(--border-strong); }
-    blockquote { border-left: 3px solid var(--accent); padding-left: 1.5rem; margin: 1.5rem 0; color: var(--text-muted); font-style: italic; }
 
     /* Header */
     header {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(255,255,255,0.9);
-      backdrop-filter: saturate(180%) blur(20px);
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
-      height: var(--header-height);
+      height: 64px;
     }
-    @media (prefers-color-scheme: dark) {
-      header { background: rgba(11,18,32,0.9); }
-    }
+    @media (prefers-color-scheme: dark) { header { background: rgba(11,18,32,0.95); } }
     .header-inner {
       display: flex; align-items: center; justify-content: space-between;
       height: 100%; max-width: var(--max-width); margin: 0 auto; padding: 0 24px;
     }
     .logo {
       display: flex; align-items: center; gap: 10px;
-      font-weight: 700; font-size: 1.1rem; color: var(--text);
-      text-decoration: none; border-bottom: none;
+      font-weight: 700; font-size: 1.1rem; color: var(--text); text-decoration: none;
     }
     .logo svg { width: 32px; height: 32px; color: var(--accent); }
-    .header-links { display: flex; gap: 8px; }
-    .header-link {
+    .nav-links { display: flex; gap: 12px; }
+    .nav-link {
       padding: 8px 14px; border-radius: var(--radius);
       font-size: 0.875rem; font-weight: 500; color: var(--text-muted);
       border-bottom: none; transition: all var(--transition);
     }
-    .header-link:hover { color: var(--accent); background: var(--accent-light); border-bottom: none; }
-    .header-link.primary {
-      background: var(--accent); color: white;
-    }
-    .header-link.primary:hover { background: var(--accent-hover); color: white; }
+    .nav-link:hover { color: var(--accent); background: var(--accent-light); }
+    .nav-link.primary { background: var(--accent); color: white; }
+    .nav-link.primary:hover { background: var(--accent-hover); }
 
     /* Hero */
     .hero {
       padding: 64px 0 48px; text-align: center;
       background: linear-gradient(180deg, var(--accent-light) 0%, transparent 100%);
     }
-    @media (prefers-color-scheme: dark) {
-      .hero { background: linear-gradient(180deg, rgba(14,165,233,0.08) 0%, transparent 100%); }
-    }
+    @media (prefers-color-scheme: dark) { .hero { background: linear-gradient(180deg, rgba(14,165,233,0.08) 0%, transparent 100%); } }
     .hero-badge {
       display: inline-flex; align-items: center; gap: 8px;
       background: var(--success-light); color: var(--success);
       padding: 8px 16px; border-radius: 999px;
-      font-size: 0.875rem; font-weight: 600; margin-bottom: 24px;
+      font-size: 0.875rem; font-weight: 600; margin-bottom: 20px;
       border: 1px solid rgba(5,150,105,0.2);
     }
-    @media (prefers-color-scheme: dark) {
-      .hero-badge { background: var(--success-light); border-color: rgba(52,211,153,0.2); }
-    }
     .hero-badge i { font-size: 0.75rem; }
-    .hero h1 { margin-bottom: 16px; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero h1 { margin-bottom: 14px; background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .hero .subtitle {
-      font-size: 1.15rem; color: var(--text-muted); max-width: 640px; margin: 0 auto 32px; line-height: 1.7;
+      font-size: 1.1rem; color: var(--text-muted); max-width: 600px; margin: 0 auto 24px; line-height: 1.7;
     }
     .hero-meta {
-      display: flex; flex-wrap: wrap; justify-content: center; gap: 16px 24px; margin-bottom: 32px; font-size: 0.9rem; color: var(--text-muted);
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 32px; font-size: 0.85rem; color: var(--text-muted);
     }
     .hero-meta span { display: flex; align-items: center; gap: 6px; }
-    .hero-meta i { color: var(--accent); font-size: 0.85rem; }
+    .hero-meta i { color: var(--accent); font-size: 0.8rem; }
 
     /* Stats Bar */
     .stats-bar {
-      display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
-      margin-top: 40px; padding: 24px;
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      margin-top: 32px; padding: 20px;
       background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
       box-shadow: var(--shadow);
     }
-    .stat { text-align: center; padding: 0 8px; }
-    .stat-value { font-size: 2.25rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); line-height: 1.1; }
-    .stat-label { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; font-weight: 500; }
+    .stat { text-align: center; }
+    .stat-value { font-size: 1.75rem; font-weight: 700; color: var(--accent); font-family: var(--font-mono); line-height: 1.1; }
+    .stat-label { font-size: 0.8rem; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
 
-    /* Layout - Sidebar + Content */
-    .content-wrapper {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 32px;
-    }
-    @media (min-width: 1024px) {
-      .content-wrapper {
-        grid-template-columns: 260px 1fr;
-        align-items: start;
-      }
-    }
-
-    /* Table of Contents - Sidebar */
-    .toc {
+    /* Table of Contents - inline at top */
+    .toc-card {
       background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 20px 24px; box-shadow: var(--shadow);
+      padding: 20px 24px; margin: 32px 0;
+      box-shadow: var(--shadow);
     }
-    @media (min-width: 1024px) {
-      .toc {
-        position: sticky; top: calc(var(--header-height) + 24px);
-        max-height: calc(100vh - var(--header-height) - 48px);
-        overflow-y: auto;
-        margin-right: 24px;
-        margin-bottom: 0;
-      }
+    .toc-title {
+      font-size: 0.8125rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;
+      color: var(--text-muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px;
     }
-    @media (max-width: 1023px) {
-      .toc { margin-bottom: 24px; }
-      .toc-toggle { display: block; }
-      .toc.collapsed ul { display: none; }
-    }
-    .toc-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
-    .toc-title { font-size: 0.875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); }
-    .toc-toggle { display: none; background: none; border: none; color: var(--accent); font-size: 0.875rem; font-weight: 500; cursor: pointer; }
-    .toc ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-    .toc li a {
-      display: block; padding: 8px 12px; border-radius: var(--radius);
-      font-size: 0.95rem; color: var(--text-secondary); font-weight: 500;
+    .toc-title i { color: var(--accent); font-size: 0.9rem; }
+    .toc-list { list-style: none; padding: 0; margin: 0; }
+    .toc-list li { margin: 0; }
+    .toc-list li a {
+      display: block; padding: 7px 10px; border-radius: var(--radius);
+      font-size: 0.875rem; color: var(--text-secondary); font-weight: 400;
       border-bottom: none; transition: all var(--transition);
     }
-    .toc li a:hover { color: var(--accent); background: var(--accent-light); border-bottom: none; }
-    .toc li a.active { color: var(--accent); background: var(--accent-light); }
+    .toc-list li a:hover { color: var(--accent); background: var(--accent-light); }
+    .toc-list li a.active { color: var(--accent); background: var(--accent-light); }
 
-    /* Article Content */
-    article { max-width: var(--max-width); }
+    /* Main Content */
+    main { padding: 0 0 64px; }
+    article { }
+
+    h1, h2, h3, h4 { font-weight: 700; line-height: 1.25; color: var(--text); }
+    h1 { font-size: clamp(2rem, 5vw, 2.75rem); letter-spacing: -0.02em; margin-bottom: 1rem; }
+    h2 { font-size: clamp(1.5rem, 3vw, 2rem); margin-top: 3rem; margin-bottom: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+    h3 { font-size: 1.25rem; margin-top: 2rem; margin-bottom: 0.75rem; }
+    p { margin: 1rem 0; color: var(--text-secondary); }
+    ul, ol { margin: 1rem 0; padding-left: 1.5rem; color: var(--text-secondary); }
+    ul li, ol li { margin: 0.5rem 0; }
+    blockquote { border-left: 3px solid var(--accent); padding-left: 1.5rem; margin: 1.5rem 0; color: var(--text-muted); font-style: italic; }
+
     .lead {
       font-size: 1.15rem; line-height: 1.8; color: var(--text-secondary);
       border-left: 3px solid var(--accent); padding-left: 1.5rem; margin: 2rem 0;
     }
-    .section { padding: 2.5rem 0; }
-    .section-header { text-align: center; margin-bottom: 3rem; }
-    .section-header h2 { border-top: none; margin-top: 0; }
-    .section-header p { color: var(--text-muted); max-width: 560px; margin: 0.75rem auto 0; font-size: 1.05rem; }
 
-    /* Cards Grid */
-    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    /* Cards */
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin: 2rem 0; }
     .card {
       background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 28px; transition: all var(--transition);
+      padding: 24px; transition: all var(--transition);
     }
-    .card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+    .card:hover { border-color: var(--accent); box-shadow: var(--shadow); transform: translateY(-2px); }
     .card-icon {
-      width: 48px; height: 48px; background: var(--accent-light); border-radius: 12px;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 16px; color: var(--accent); font-size: 1.5rem;
+      width: 44px; height: 44px; background: var(--accent-light); border-radius: 10px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 14px; color: var(--accent); font-size: 1.4rem;
     }
-    .card h3 { margin-bottom: 10px; }
-    .card p { color: var(--text-muted); margin: 0; font-size: 0.95rem; }
-    .card ul { margin: 12px 0 0; padding-left: 20px; color: var(--text-muted); font-size: 0.95rem; }
+    .card h3 { margin-bottom: 10px; font-size: 1.1rem; }
+    .card p { color: var(--text-muted); margin: 0; font-size: 0.95rem; line-height: 1.6; }
+    .card ul { margin: 12px 0 0; padding-left: 20px; color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; }
     .card li { margin: 8px 0; }
 
-    /* Procedure / Steps */
+    /* Procedure Steps */
     .procedure { margin: 2rem 0; }
     .step {
-      display: flex; gap: 20px; margin-bottom: 2.5rem; padding-bottom: 2.5rem; border-bottom: 1px solid var(--border);
+      display: flex; gap: 18px; margin-bottom: 2rem; padding-bottom: 2rem; border-bottom: 1px solid var(--border);
     }
     .step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
     .step-number {
@@ -373,7 +220,10 @@
     .step-content { flex: 1; }
     .step-content h3 { margin: 0 0 0.5rem; font-size: 1.2rem; }
     .step-content p { margin: 0.5rem 0; }
-    .step-code { background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 1rem 0; overflow-x: auto; }
+    .step-code {
+      background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 16px; margin: 1rem 0; overflow-x: auto;
+    }
     .step-code pre { margin: 0; font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.7; }
     .step-code .comment { color: var(--text-muted); }
     .step-code .command { color: var(--success); font-weight: 500; }
@@ -384,11 +234,11 @@
       background: var(--bg-muted); border: 1px solid var(--border); border-bottom: none;
       font-weight: 500; transition: all var(--transition);
     }
-    .step-link:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); border-bottom: none; }
+    .step-link:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
 
     /* Verification Grid */
     .verify-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin: 2rem 0;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 2rem 0;
     }
     .verify-item {
       display: flex; gap: 14px; padding: 20px;
@@ -401,11 +251,10 @@
       display: flex; align-items: center; justify-content: center; font-size: 1.25rem;
     }
     .verify-icon.success { background: var(--success-light); color: var(--success); }
-    .verify-icon.warning { background: var(--warning-light); color: var(--warning); }
     .verify-text strong { display: block; font-size: 0.95rem; margin-bottom: 4px; }
     .verify-text span { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
 
-    /* Prerequisites Box */
+    /* Prerequisites */
     .prereq-box {
       margin: 2rem 0; padding: 24px;
       background: var(--warning-light); border: 1px solid rgba(217,119,6,0.3); border-radius: var(--radius-lg);
@@ -413,14 +262,8 @@
     .prereq-title { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; color: var(--warning); font-weight: 600; font-size: 1.05rem; }
     .prereq-box ul { padding-left: 20px; margin: 0; color: var(--text-secondary); line-height: 1.9; }
     .prereq-box li { margin: 8px 0; }
-    .prereq-box code { background: rgba(0,0,0,0.08); }
 
-    @media (prefers-color-scheme: dark) {
-      .prereq-box { background: var(--warning-light); border-color: rgba(251,191,36,0.3); }
-      .prereq-box code { background: rgba(255,255,255,0.1); }
-    }
-
-    /* Callout / Note */
+    /* Callouts */
     .callout {
       display: flex; gap: 14px; padding: 20px 24px;
       background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
@@ -435,27 +278,7 @@
     .callout-content strong { display: block; margin-bottom: 4px; }
     .callout-content p { margin: 0; color: var(--text-secondary); font-size: 0.95rem; }
 
-    /* FAQ */
-    .faq { max-width: var(--max-width); margin: 0 auto; }
-    details.faq-item {
-      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      margin-bottom: 12px; overflow: hidden;
-    }
-    details.faq-item summary {
-      padding: 18px 24px; cursor: pointer; font-weight: 600; font-size: 1.05rem;
-      list-style: none; display: flex; justify-content: space-between; align-items: center;
-      transition: background var(--transition);
-    }
-    details.faq-item summary:hover { background: var(--bg-muted); }
-    details.faq-item summary::-webkit-details-marker { display: none; }
-    details.faq-item summary i { transition: transform var(--transition); }
-    details.faq-item[open] summary i { transform: rotate(180deg); }
-    details.faq-item summary:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
-    .faq-content { padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; }
-    .faq-content code { background: var(--code-bg); color: var(--code-text); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em; }
-    .faq-content a { font-weight: 500; }
-
-    /* Code Block (standalone) */
+    /* Code Block */
     .code-block {
       background: var(--bg-muted); border: 1px solid var(--border); border-radius: var(--radius-lg);
       overflow: hidden; font-family: var(--font-mono); font-size: 0.9rem; line-height: 1.7;
@@ -475,56 +298,41 @@
     .code-comment { color: var(--text-muted); }
     .code-command { color: var(--success); }
     .code-output { color: var(--text-muted); }
-    .copy-btn {
-      position: absolute; top: 12px; right: 12px;
-      background: var(--bg-card); border: 1px solid var(--border);
-      color: var(--text-muted); padding: 8px 12px; border-radius: var(--radius);
-      font-size: 0.8rem; cursor: pointer; transition: all var(--transition);
-      font-family: var(--font-sans); font-weight: 500;
-    }
-    .copy-btn:hover { background: var(--accent-light); color: var(--accent); border-color: var(--accent); }
 
     /* Resource Cards */
-    .resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+    .resource-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 18px; margin: 2rem 0; }
     .resource-card {
       background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
-      padding: 24px; transition: all var(--transition);
+      padding: 20px; transition: all var(--transition);
     }
-    .resource-card:hover { border-color: var(--accent); box-shadow: var(--shadow-lg); }
+    .resource-card:hover { border-color: var(--accent); box-shadow: var(--shadow); }
     .resource-card h3 { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; font-size: 1.1rem; }
     .resource-card h3 i { color: var(--accent); }
     .resource-card ul { list-style: none; padding: 0; margin: 0; }
-    .resource-card li { display: flex; align-items: flex-start; gap: 10px; padding: 8px 0; color: var(--text-secondary); font-size: 0.95rem; }
+    .resource-card li { display: flex; align-items: flex-start; gap: 10px; padding: 7px 0; color: var(--text-secondary); font-size: 0.95rem; }
     .resource-card li:not(:last-child) { border-bottom: 1px solid var(--border); }
     .resource-card li i { color: var(--success); margin-top: 3px; flex-shrink: 0; }
 
     /* Footer CTA */
     .footer-cta {
-      text-align: center; padding: 60px 40px; margin-top: 4rem;
+      text-align: center; padding: 56px 24px; margin-top: 4rem;
       background: linear-gradient(135deg, var(--accent-light) 0%, transparent 100%);
       border-radius: var(--radius-lg); border: 1px solid var(--border);
     }
-    @media (prefers-color-scheme: dark) {
-      .footer-cta { background: linear-gradient(135deg, rgba(14,165,233,0.08) 0%, transparent 100%); }
-    }
     .footer-cta h2 { margin-bottom: 12px; }
-    .footer-cta p { color: var(--text-muted); margin-bottom: 28px; max-width: 520px; margin-left: auto; margin-right: auto; }
+    .footer-cta p { color: var(--text-muted); margin-bottom: 24px; max-width: 520px; margin-left: auto; margin-right: auto; }
 
     /* Buttons */
     .btn {
       display: inline-flex; align-items: center; gap: 10px;
-      padding: 14px 28px; border-radius: var(--radius);
+      padding: 12px 24px; border-radius: var(--radius);
       font-weight: 600; font-size: 1rem; transition: all var(--transition);
-      border: none; cursor: pointer; text-decoration: none; border-bottom: none;
+      border: none; cursor: pointer; text-decoration: none;
     }
     .btn-primary {
       background: var(--accent); color: white; box-shadow: 0 4px 14px rgba(14,165,233,0.3);
     }
-    .btn-primary:hover { background: var(--accent-hover); color: white; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,233,0.4); border-bottom: none; }
-    .btn-secondary {
-      background: var(--bg-muted); color: var(--text); border: 1px solid var(--border);
-    }
-    .btn-secondary:hover { background: var(--border-strong); color: var(--text); border-bottom: none; }
+    .btn-primary:hover { background: var(--accent-hover); color: white; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(14,165,233,0.4); }
     .btn-github { background: #1e293b; color: #e2e8f0; border: 1px solid #334158; }
     .btn-github:hover { background: #334158; border-color: #475569; }
 
@@ -536,44 +344,57 @@
     }
     footer a { color: var(--text-muted); border-bottom: 1px solid transparent; }
     footer a:hover { color: var(--accent); border-bottom-color: var(--accent); }
-    .footer-links { display: flex; justify-content: center; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
-    .disclaimer { max-width: var(--max-width); margin: 0 auto 20px; padding: 0 24px; text-align: left; font-size: 0.875rem; line-height: 1.7; }
+    .footer-links { display: flex; justify-content: center; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+    .disclaimer { max-width: var(--max-width); margin: 0 auto 16px; padding: 0 24px; text-align: left; font-size: 0.875rem; line-height: 1.7; }
     .disclaimer strong { color: var(--text); }
-    .ai-notice { margin-top: 16px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .ai-notice { margin-top: 12px; font-size: 0.85rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .copyright { margin-top: 12px; font-size: 0.85rem; }
+
+    /* FAQ */
+    .faq { max-width: var(--max-width); margin: 0 auto; }
+    details.faq-item {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      margin-bottom: 12px; overflow: hidden;
+    }
+    details.faq-item summary {
+      padding: 18px 24px; cursor: pointer; font-weight: 600; font-size: 1.05rem;
+      list-style: none; display: flex; justify-content: space-between; align-items: center;
+      transition: background var(--transition);
+    }
+    details.faq-item summary:hover { background: var(--bg-muted); }
+    details.faq-item summary::-webkit-details-marker { display: none; }
+    details.faq-item summary i { transition: transform var(--transition); }
+    details.faq-item[open] summary i { transform: rotate(180deg); }
+    .faq-content { padding: 0 24px 20px; color: var(--text-secondary); line-height: 1.7; }
+    .faq-content code { background: var(--code-bg); color: var(--code-text); padding: 2px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 0.9em; }
+    .faq-content a { font-weight: 500; }
 
     /* Print */
     @media print {
-      header, .hero, .stats-bar, .toc, .footer-cta, footer, .copy-btn, .btn { display: none !important; }
+      header, .hero, .toc-card, .footer-cta, footer, .btn { display: none !important; }
       .section { border-top: none; page-break-inside: avoid; }
       body { background: white; color: black; font-size: 12pt; }
       .code-block { border: 1px solid #ccc; break-inside: avoid; }
       .card { break-inside: avoid; border: 1px solid #ddd; box-shadow: none; }
       a { color: black; text-decoration: underline; }
-      a[href^="http"]::after { content: " (" attr(href) ")"; font-size: 0.8em; }
     }
 
-    /* Reduced motion */
+    @media (max-width: 640px) {
+      .hero { padding: 48px 0 32px; }
+      .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
+      .stat-value { font-size: 1.5rem; }
+      .step { flex-direction: column; gap: 12px; }
+      .step-number { width: 32px; height: 32px; font-size: 1rem; }
+      .footer-cta { padding: 40px 20px; }
+      .btn { width: 100%; justify-content: center; }
+      .verify-grid { grid-template-columns: 1fr; }
+      .container { padding: 0 16px; }
+    }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
       html { scroll-behavior: auto; }
     }
-
-    /* Focus visible */
     :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-
-    /* Mobile */
-    @media (max-width: 640px) {
-      .hero { padding: 48px 0 32px; }
-      .stats-bar { grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 16px; }
-      .stat-value { font-size: 1.75rem; }
-      .step { flex-direction: column; gap: 12px; }
-      .step-number { width: 32px; height: 32px; font-size: 1rem; }
-      .footer-cta { padding: 40px 24px; }
-      .btn { width: 100%; justify-content: center; }
-      .cta-row { flex-direction: column; }
-      .verify-grid { grid-template-columns: 1fr; }
-    }
   </style>
 </head>
 <body>
@@ -582,7 +403,7 @@
   <!-- Header -->
   <header role="banner">
     <div class="header-inner">
-      <a href="https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/" class="logo" aria-label="Moto G45 Bootloop Fix Home">
+      <a href="https://bnbcast.github.io/motorola-g45-bootlooping-keep-restarting-fix/" class="logo" aria-label="Home">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <rect x="2" y="4" width="20" height="16" rx="2"/>
           <path d="M6 8h12M6 12h12M6 16h8"/>
@@ -590,9 +411,9 @@
         </svg>
         Moto G45 Bootloop Fix
       </a>
-      <nav class="header-links" aria-label="Main navigation">
-        <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix" class="header-link" target="_blank" rel="noopener">Repository</a>
-        <a href="#the-fix" class="header-link primary">View The Fix</a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix" class="nav-link" target="_blank" rel="noopener">Repository</a>
+        <a href="#the-fix" class="nav-link primary">View The Fix</a>
       </nav>
     </div>
   </header>
@@ -605,36 +426,35 @@
         <span>Verified Fix — Zero Modem Crashes</span>
       </div>
       <h1 id="hero-title">Moto G45 5G Bootloop Fix</h1>
-      <p class="subtitle">The 2-minute reboot loop on <strong>XT2363-9</strong> (codename <code>fogos</strong>) is caused by <strong>corrupt modem non-volatile memory in <code>modemst1</code>/<code>modemst2</code></strong>. The repair: unlock the bootloader, erase both partitions, and let the modem rebuild a clean NV database from the golden <code>fsg</code> partition.</p>
+      <p class="subtitle">The 2-minute reboot loop on <strong>XT2363-9</strong> (codename <code>fogos</strong>) is caused by <strong>corrupt modem non-volatile memory in <code>modemst1</code>/<code>modemst2</code></strong>. The repair: unlock the bootloader, erase both partitions, and let the modem rebuild clean NV from the golden <code>fsg</code> partition.</p>
 
       <div class="hero-meta">
         <span><i class="fas fa-mobile-alt"></i> Motorola Moto G45 5G (XT2363-9)</span>
         <span><i class="fas fa-microchip"></i> Snapdragon 6s Gen 3 (SM6375)</span>
         <span><i class="fas fa-code-branch"></i> Codename: <code>fogos</code></span>
-        <span><i class="fas fa-calendar"></i> Android 15 / Build V1UGS35H.75-14-9-3-1-4</span>
+        <span><i class="fas fa-calendar"></i> Android 15 · Build V1UGS35H.75-14-9-3-1-4</span>
       </div>
 
-      <!-- Stats Bar -->
-      <div class="stats-bar" role="list" aria-label="Repair verification results">
-        <div class="stat" role="listitem">
+      <div class="stats-bar">
+        <div class="stat">
           <div class="stat-value">0</div>
           <div class="stat-label">Modem Crashes</div>
         </div>
-        <div class="stat" role="listitem">
+        <div class="stat">
           <div class="stat-value">2h+</div>
           <div class="stat-label">Continuous Uptime</div>
         </div>
-        <div class="stat" role="listitem">
+        <div class="stat">
           <div class="stat-value">100%</div>
           <div class="stat-label">Data Integrity</div>
         </div>
-        <div class="stat" role="listitem">
+        <div class="stat">
           <div class="stat-value">✓</div>
           <div class="stat-label">IMEI Preserved</div>
         </div>
       </div>
 
-      <div class="cta-row" style="display:flex;justify-content:center;gap:16px;margin-top:32px;flex-wrap:wrap;">
+      <div style="display:flex;justify-content:center;gap:12px;margin-top:32px;flex-wrap:wrap;">
         <a href="#the-fix" class="btn btn-primary">
           <i class="fas fa-terminal"></i> View The Fix Procedure
         </a>
@@ -648,58 +468,48 @@
   <!-- Main Content -->
   <main id="main" role="main">
     <div class="container">
-      <div class="content-wrapper">
 
-        <!-- Table of Contents -->
-        <nav class="toc" aria-label="Table of contents" id="toc">
-          <div class="toc-header">
-            <span class="toc-title"><i class="fas fa-list"></i> Contents</span>
-            <button class="toc-toggle" aria-label="Toggle table of contents" onclick="document.getElementById('toc').classList.toggle('collapsed')">
-              <i class="fas fa-chevron-up"></i>
-            </button>
-          </div>
-          <ul>
-            <li><a href="#the-problem">The Problem — Why the phone bootloops</a></li>
-            <li><a href="#root-cause">Root Cause Analysis — What actually fails</a></li>
-            <li><a href="#prerequisites">Prerequisites — What you need before starting</a></li>
-            <li><a href="#the-fix">The Fix Procedure — Step-by-step commands</a></li>
-            <li><a href="#verification">Verification — How to confirm the repair</a></li>
-            <li><a href="#faq">Frequently Asked Questions</a></li>
-            <li><a href="#full-docs">Full Documentation & Resources</a></li>
-          </ul>
-        </nav>
+      <!-- Table of Contents - inline (no sidebar) -->
+      <div class="toc-card">
+        <div class="toc-title"><i class="fas fa-list"></i> Contents</div>
+        <ul class="toc-list">
+          <li><a href="#the-problem">The Problem — Why the phone bootloops</a></li>
+          <li><a href="#root-cause">Root Cause — What actually fails</a></li>
+          <li><a href="#prerequisites">Prerequisites — What you need</a></li>
+          <li><a href="#the-fix">The Fix Procedure — Step-by-step</a></li>
+          <li><a href="#verification">Verification — Confirm the repair</a></li>
+          <li><a href="#faq">Frequently Asked Questions</a></li>
+          <li><a href="#full-docs">Full Documentation & Resources</a></li>
+        </ul>
+      </div>
 
-        <article>
-
+      <article>
         <!-- The Problem -->
         <section id="the-problem" class="section">
           <div class="section-header">
             <h2>The Problem</h2>
             <p>Your Moto G45 5G reboots every ~2 minutes. Factory resets and firmware flashes don't help. Understanding why is the first step to fixing it.</p>
           </div>
-
           <div class="cards">
             <article class="card">
               <div class="card-icon"><i class="fas fa-sync-alt"></i></div>
               <h3>Symptom: The 2-Minute Bootloop</h3>
-              <p>The phone boots normally, operates for approximately 2 minutes, then reboots. This cycle repeats indefinitely. The loop persists through OTA updates, LMSA firmware flashes, and factory resets.</p>
+              <p>The phone boots normally, operates for ~2 minutes, then reboots. This cycle repeats indefinitely. Survives OTA updates, LMSA firmware flashes, and factory resets.</p>
             </article>
-
             <article class="card">
               <div class="card-icon"><i class="fas fa-microchip"></i></div>
               <h3>Why Standard Fixes Fail</h3>
               <ul>
-                <li>OTA / LMSA flashes rewrite AP partitions only — never touch <code>modemst1/2</code></li>
-                <li>Factory reset masks the issue for ~3 hours by re-provisioning the modem stack</li>
-                <li>Disabling apps reduces crash frequency but doesn't address the modem</li>
-                <li>Custom ROMs replace Android, not the modem firmware or its NV storage</li>
+                <li>OTA/LMSA flashes never touch <code>modemst1/2</code></li>
+                <li>Factory reset only masks it for ~3 hours</li>
+                <li>Disabling apps reduces crash rate but doesn't fix the modem</li>
+                <li>Custom ROMs can't fix it — they don't touch modem partitions</li>
               </ul>
             </article>
-
             <article class="card">
               <div class="card-icon"><i class="fas fa-exclamation-triangle"></i></div>
               <h3>The Crash Fingerprint</h3>
-              <p>Every reboot generates a <code>qcrilNrd</code> crash with <code>SIGSEGV</code> at address <code>0xffffffffffffff02</code> (<code>-254</code> used as a pointer). This is the definitive signature of corrupt modem NV.</p>
+              <p>Every reboot generates a <code>qcrilNrd</code> crash with <code>SIGSEGV</code> at <code>0xffffffffffffff02</code> (<code>-254</code> used as a pointer). Definitive signature of corrupt modem NV.</p>
             </article>
           </div>
         </section>
@@ -708,37 +518,30 @@
         <section id="root-cause" class="section">
           <div class="section-header">
             <h2>Root Cause Analysis</h2>
-            <p>Two processors, one broken communication channel. Here's what happens under the hood.</p>
+            <p>Two processors, one broken communication channel.</p>
           </div>
-
           <div class="lead">
-            The device contains two independent computers: the <strong>Application Processor (AP)</strong> running Android, and the <strong>Modem/Baseband</strong> handling radio, SIM, calls, and mobile data. They communicate over Qualcomm's <strong>OEM Hook</strong> channel, brokered by the RIL daemon <code>qcrilNrd</code>.
+            The device contains two independent computers: the <strong>Application Processor (AP)</strong> running Android, and the <strong>Modem/Baseband</strong> handling radio, SIM, calls, and data. They communicate over Qualcomm's <strong>OEM Hook</strong> channel, brokered by RIL daemon <code>qcrilNrd</code>.
           </div>
-
           <h3>The Failure Chain</h3>
           <ol style="margin: 1.5rem 0; padding-left: 1.5rem; line-height: 2;">
-            <li><strong>Corrupt NV Database:</strong> The modem's non-volatile memory (<code>modemst1</code>/<code>modemst2</code>) is corrupted. On every boot, the modem fails its consistency check and asserts.</li>
-            <li><strong>QMI Services Vanish:</strong> The modem's QMI (Qualcomm MSM Interface) services never come up. The communication channel goes silent.</li>
-            <li><strong>Dead Token Dereference:</strong> Motorola's proprietary library <code>libmotext_inf.so</code> attempts to send an OEM hook message using a token for a connection that no longer exists (<code>-254</code> used as a pointer).</li>
-            <li><strong><code>SIGSEGV</code> in <code>qcrilNrd</code>:</strong> The invalid memory access crashes the RIL daemon.</li>
-            <li><strong>System Server Blocks:</strong> <code>system_server</code> waits on a Binder call that will never return.</li>
-            <li><strong>Watchdog Reboot:</strong> After ~60 seconds, the hardware watchdog forces a reboot. The cycle repeats every 2 minutes.</li>
+            <li><strong>Corrupt NV Database:</strong> Modem's non-volatile memory (<code>modemst1</code>/<code>modemst2</code>) is corrupted — modem asserts on every boot.</li>
+            <li><strong>QMI Services Vanish:</strong> Modem QMI services never come up — communication channel goes silent.</li>
+            <li><strong>Dead Token Dereference:</strong> Motorola's <code>libmotext_inf.so</code> uses a token for a dead connection (<code>-254</code> as pointer).</li>
+            <li><strong><code>SIGSEGV</code> in <code>qcrilNrd</code>:</strong> Invalid memory access crashes the RIL daemon.</li>
+            <li><strong>System Server Blocks:</strong> <code>system_server</code> waits on a Binder call that never returns.</li>
+            <li><strong>Watchdog Reboot:</strong> After ~60s, hardware watchdog forces reboot. Cycle repeats every 2 minutes.</li>
           </ol>
-
           <div class="callout info">
             <div class="callout-icon"><i class="fas fa-info"></i></div>
             <div class="callout-content">
-              <strong>Key insight:</strong> The <code>qcrilNrd</code> crash is a <em>symptom</em>, not the cause. The root cause is the corrupt modem NV database. Erasing <code>modemst1/2</code> allows the modem to rebuild NV from the pristine <code>fsg</code> partition.
+              <strong>Key insight:</strong> The <code>qcrilNrd</code> crash is a <em>symptom</em>, not the cause. Erasing <code>modemst1/2</code> lets the modem rebuild NV from the pristine <code>fsg</code> partition.
             </div>
           </div>
-
           <h3>Crash Stack Trace</h3>
           <div class="code-block">
             <div class="code-header">
-              <span class="code-dot red"></span>
-              <span class="code-dot yellow"></span>
-              <span class="code-dot green"></span>
-              <span>logcat -b crash</span>
+              <span class="code-dot red"></span><span class="code-dot yellow"></span><span class="code-dot green"></span><span>logcat -b crash</span>
             </div>
             <pre class="code-body"><code>Process:  /vendor/bin/hw/qcrilNrd  (uid 1001)
 Signal:   SIGSEGV, SEGV_MAPERR
@@ -747,7 +550,7 @@ Fault:    0xffffffffffffff02  (-254 used as pointer)
 #00  libqcrilNr.so  qcril_qmi_oem_free_and_convert_ril_token_to_oem_token
 #01  libqcrilNr.so  qcril_qmi_oemhook_agent_send
 #02  libqcrilNr.so  mot_qcril_qmi_oemhook_agent_send
-#03  libmotext_inf.so  communicationThread        <-- Motorola proprietary
+#03  libmotext_inf.so  communicationThread      &lt;-- Motorola proprietary
 #04  libc.so          __pthread_start</code></pre>
           </div>
         </section>
@@ -756,26 +559,24 @@ Fault:    0xffffffffffffff02  (-254 used as pointer)
         <section id="prerequisites" class="section">
           <div class="section-header">
             <h2>Prerequisites</h2>
-            <p>This is not a phone-only repair. You need a PC, a data cable, and preparation. Most failures happen before the first command.</p>
+            <p>This is not a phone-only repair. You need a PC, a data cable, and preparation.</p>
           </div>
-
           <div class="prereq-box">
             <div class="prereq-title"><i class="fas fa-exclamation-triangle"></i> Critical Requirements — Read Before Starting</div>
             <ul>
               <li><strong>Unlockable bootloader</strong> — Motorola only unlocks retail units (XT2363-9 is retail). <code>fastboot erase</code> is refused while locked.</li>
               <li><strong>Record IMEI first</strong> — Dial <code>*#06#</code> and write both numbers down. The erase wipes the NV store holding IMEI.</li>
-              <li><strong>Full backup before unlock</strong> — Unlocking wipes <code>/data</code> (WhatsApp keys, 2FA seeds, everything). See <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/06-backup.md" target="_blank" rel="noopener">backup guide</a>.</li>
-              <li><strong>Do NOT relock</strong> — Relocking a modified boot chain (erased <code>modemst1/2</code>) will hard-brick the device.</li>
+              <li><strong>Full backup before unlock</strong> — Unlocking wipes <code>/data</code> (WhatsApp keys, 2FA seeds, everything).</li>
+              <li><strong>Do NOT relock</strong> — Relocking a modified boot chain will hard-brick the device.</li>
             </ul>
           </div>
-
           <div class="cards" style="margin-top: 2rem;">
             <article class="card">
               <div class="card-icon"><i class="fas fa-laptop"></i></div>
               <h3>Hardware & Environment</h3>
               <ul>
-                <li>Windows 10/11 PC with admin rights (Motorola LMSA is Windows-only)</li>
-                <li>USB <strong>data</strong> cable — not charge-only (common failure point)</li>
+                <li>Windows 10/11 PC with admin rights</li>
+                <li>USB <strong>data</strong> cable — not charge-only</li>
                 <li>Direct USB port — no hubs or docks</li>
                 <li>30–60 GB free disk space</li>
               </ul>
@@ -797,7 +598,6 @@ Fault:    0xffffffffffffff02  (-254 used as pointer)
                 <li>Screen lock set to <strong>None</strong> temporarily</li>
                 <li>Battery > 50%</li>
                 <li>Google account password known (FRP)</li>
-                <li>2FA seeds exported, backups complete</li>
               </ul>
             </article>
           </div>
@@ -809,64 +609,50 @@ Fault:    0xffffffffffffff02  (-254 used as pointer)
             <h2>The Fix Procedure</h2>
             <p>Seven precise steps. Follow them in order. Do not skip verification.</p>
           </div>
-
-          <div class="procedure" role="list" aria-label="Repair procedure steps">
-
+          <div class="procedure">
             <!-- Step 1 -->
-            <div class="step" role="listitem">
+            <div class="step">
               <div class="step-number">1</div>
               <div class="step-content">
                 <h3>Back Up All Data</h3>
-                <p>Unlocking the bootloader performs a factory reset, permanently deleting everything in <code>/data</code> — including WhatsApp encryption keys, authenticator app seeds, and all personal files.</p>
+                <p>Unlocking performs a factory reset, permanently deleting everything in <code>/data</code> — including WhatsApp keys, authenticator seeds, and personal files.</p>
                 <div class="step-links">
                   <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/06-backup.md" target="_blank" rel="noopener" class="step-link"><i class="fas fa-external-link-alt"></i> Backup Guide</a>
-                  <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/scripts/adb/" target="_blank" rel="noopener" class="step-link"><i class="fas fa-file-code"></i> ADB Backup Scripts</a>
                 </div>
               </div>
             </div>
-
             <!-- Step 2 -->
-            <div class="step" role="listitem">
+            <div class="step">
               <div class="step-number">2</div>
               <div class="step-content">
                 <h3>Confirm This Is Your Bug</h3>
-                <p>Verify the exact symptom: 2-minute reboot cycle with <code>qcrilNrd</code> <code>SIGSEGV</code> at <code>0xffffffffffffff02</code> in the crash buffer (<code>logcat -b crash</code>). Other bootloop causes require different fixes.</p>
-                <div class="step-links">
-                  <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/01-symptoms.md" target="_blank" rel="noopener" class="step-link"><i class="fas fa-stethoscope"></i> Symptom Checklist</a>
-                  <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/scripts/adb/collect-evidence.ps1" target="_blank" rel="noopener" class="step-link"><i class="fas fa-download"></i> Evidence Collection Script</a>
-                </div>
+                <p>Verify: 2-minute reboot cycle with <code>qcrilNrd</code> <code>SIGSEGV</code> at <code>0xffffffffffffff02</code> in <code>logcat -b crash</code>.</p>
               </div>
             </div>
-
             <!-- Step 3 -->
-            <div class="step" role="listitem">
+            <div class="step">
               <div class="step-number">3</div>
               <div class="step-content">
                 <h3>Record IMEI</h3>
-                <p>Dial <code>*#06#</code> and write down <strong>both</strong> IMEI numbers. The repair erases the NV partition storing IMEI; the modem rewrites it from <code>fsg</code> on first boot, but you must verify.</p>
+                <p>Dial <code>*#06#</code> and write down <strong>both</strong> IMEI numbers. The erase wipes NV storing IMEI; modem rewrites it from <code>fsg</code> on first boot — verify after.</p>
               </div>
             </div>
-
             <!-- Step 4 -->
-            <div class="step" role="listitem">
+            <div class="step">
               <div class="step-number">4</div>
               <div class="step-content">
                 <h3>Unlock the Bootloader</h3>
-                <p>Use Motorola's official unlock portal (<a href="https://motorola-global-portal.custhelp.com/app/standalone/bootloader/unlock-your-device-b" target="_blank" rel="noopener">motorola-global-portal.custhelp.com</a>). This requires a Motorola account, will wipe the device, and only works on retail units. The XT2363-9 is unlockable.</p>
-                <div class="step-links">
-                  <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/12-confirmed-fix-nv-repair.md#unlocking-the-bootloader" target="_blank" rel="noopener" class="step-link"><i class="fas fa-unlock"></i> Detailed Unlock Guide</a>
-                </div>
+                <p>Use Motorola's official unlock portal (<a href="https://motorola-global-portal.custhelp.com/app/standalone/bootloader/unlock-your-device-b" target="_blank" rel="noopener">motorola-global-portal.custhelp.com</a>). Requires Motorola account, wipes device, only works on retail units.</p>
               </div>
             </div>
-
             <!-- Step 5 -->
-            <div class="step" role="listitem">
+            <div class="step">
               <div class="step-number">5</div>
               <div class="step-content">
-                <h3>Erase the Modem NV Partitions</h3>
+                <h3>Erase Modem NV Partitions</h3>
                 <p>Boot into fastboot mode (<kbd>Power</kbd> + <kbd>Volume Down</kbd>), then run:</p>
                 <div class="step-code">
-                  <pre><code><span class="code-comment"># Erase both modem NV partitions</span>
+<pre><code><span class="code-comment"># Erase both modem NV partitions</span>
 <span class="code-command">fastboot erase modemst1</span>
 <span class="code-output">OKAY [  0.139s]</span>
 
@@ -879,15 +665,14 @@ Fault:    0xffffffffffffff02  (-254 used as pointer)
                 <p>The modem automatically reconstructs a clean NV database from the pristine <code>fsg</code> partition on first boot. This is the actual fix.</p>
               </div>
             </div>
-
             <!-- Step 6 -->
-            <div class="step" role="listitem">
+            <div class="step">
               <div class="step-number">6</div>
               <div class="step-content">
                 <h3>Verify Modem Stability</h3>
-                <p>After the phone boots (first boot may take several minutes), run these checks:</p>
+                <p>After boot (first boot may take several minutes), run:</p>
                 <div class="step-code">
-                  <pre><code><span class="code-comment"># 1. Modem crash counter must be 0</span>
+<pre><code><span class="code-comment"># 1. Modem crash counter must be 0</span>
 <span class="code-command">adb shell cat /sys/bus/msm_subsys/devices/subsys2/crash_count</span>
 <span class="code-output">0</span>
 
@@ -897,38 +682,24 @@ Fault:    0xffffffffffffff02  (-254 used as pointer)
 
 <span class="code-comment"># 3. SIM state must be LOADED</span>
 <span class="code-command">adb shell getprop gsm.sim.state</span>
-<span class="code-output">LOADED</span>
-
-<span class="code-comment"># 4. All 6 subsystems clean</span>
-<span class="code-command">for i in {0..5}; do echo "subsys$i: $(adb shell cat /sys/bus/msm_subsys/devices/subsys$i/crash_count)"; done</span>
-<span class="code-output">subsys0: 0
-subsys1: 0
-subsys2: 0
-subsys3: 0
-subsys4: 0
-subsys5: 0</span></code></pre>
-                </div>
-                <div class="step-links">
-                  <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/scripts/adb/verify.ps1" target="_blank" rel="noopener" class="step-link"><i class="fas fa-play-circle"></i> Automated Verification Script</a>
+<span class="code-output">LOADED</span></code></pre>
                 </div>
               </div>
             </div>
-
             <!-- Step 7 -->
-            <div class="step" role="listitem">
+            <div class="step">
               <div class="step-number">7</div>
               <div class="step-content">
                 <h3>Confirm IMEI & Monitor</h3>
-                <p>Dial <code>*#06#</code> — both IMEIs must match your recorded numbers exactly. Then monitor uptime for <strong>30+ minutes</strong>, then perform <strong>one manual reboot</strong> to confirm persistence across power cycles. A single clean boot is not proof.</p>
+                <p>Dial <code>*#06#</code> — both IMEIs must match your recorded numbers. Then monitor uptime for <strong>30+ minutes</strong>, then perform <strong>one manual reboot</strong> to confirm persistence. A single clean boot is not proof.</p>
                 <div class="callout success">
                   <div class="callout-icon"><i class="fas fa-check"></i></div>
                   <div class="callout-content">
-                    <strong>Success criteria:</strong> Zero modem crashes, baseband present, SIM LOADED, IMEI intact, LTE data & voice functional, 2+ hours continuous uptime, survives reboot.
+                    <strong>Success criteria:</strong> Zero modem crashes, baseband present, SIM LOADED, IMEI intact, LTE data & voice working, 2+ hours uptime, survives reboot.
                   </div>
                 </div>
               </div>
             </div>
-
           </div>
         </section>
 
@@ -936,70 +707,33 @@ subsys5: 0</span></code></pre>
         <section id="verification" class="section">
           <div class="section-header">
             <h2>Verification Results</h2>
-            <p>Not "it booted once" — continuous automated monitoring with gated validation.</p>
+            <p>Not "it booted once" — continuous automated monitoring.</p>
           </div>
-
           <div class="verify-grid">
             <div class="verify-item">
               <div class="verify-icon success"><i class="fas fa-check"></i></div>
-              <div class="verify-text">
-                <strong>Modem Crash Count = 0</strong>
-                <span>All 6 Qualcomm subsystems (ADSP, MPSS, SLPI, WCNSS, Venus, ADSP2) report zero crashes</span>
-              </div>
+              <div class="verify-text"><strong>Modem Crash Count = 0</strong><span>All 6 Qualcomm subsystems report zero crashes</span></div>
             </div>
             <div class="verify-item">
               <div class="verify-icon success"><i class="fas fa-signal"></i></div>
-              <div class="verify-text">
-                <strong>Baseband Present</strong>
-                <span>M6375_HI434_03.562.01.121R — modem firmware loaded and operational</span>
-              </div>
+              <div class="verify-text"><strong>Baseband Present</strong><span>M6375_HI434_03.562.01.121R — modem firmware operational</span></div>
             </div>
             <div class="verify-item">
               <div class="verify-icon success"><i class="fas fa-sim-card"></i></div>
-              <div class="verify-text">
-                <strong>SIM LOADED / LTE IN_SERVICE</strong>
-                <span>Mobile data, voice calls, and SMS fully functional</span>
-              </div>
+              <div class="verify-text"><strong>SIM LOADED / LTE IN_SERVICE</strong><span>Mobile data, voice calls, and SMS fully functional</span></div>
             </div>
             <div class="verify-item">
               <div class="verify-icon success"><i class="fas fa-hashtag"></i></div>
-              <div class="verify-text">
-                <strong>IMEI Intact</strong>
-                <span>Both IMEIs match pre-repair records exactly</span>
-              </div>
+              <div class="verify-text"><strong>IMEI Intact</strong><span>Both IMEIs match pre-repair records exactly</span></div>
             </div>
             <div class="verify-item">
               <div class="verify-icon success"><i class="fas fa-clock"></i></div>
-              <div class="verify-text">
-                <strong>2+ Hours Continuous Uptime</strong>
-                <span>No reboots, no framework restarts, no watchdog triggers</span>
-              </div>
+              <div class="verify-text"><strong>2+ Hours Continuous Uptime</strong><span>No reboots, no framework restarts, no watchdog triggers</span></div>
             </div>
             <div class="verify-item">
               <div class="verify-icon success"><i class="fas fa-database"></i></div>
-              <div class="verify-text">
-                <strong>100% Data Integrity</strong>
-                <span>9.4 GB staged restore across 5 gates — 3,452 files, zero corruption</span>
-              </div>
+              <div class="verify-text"><strong>100% Data Integrity</strong><span>9.4 GB staged restore across 5 gates — 3,452 files, zero corruption</span></div>
             </div>
-          </div>
-
-          <div class="cards" style="margin-top: 2rem;">
-            <article class="card">
-              <div class="card-icon"><i class="fas fa-chart-line"></i></div>
-              <h3>4-Hour Stability Watch</h3>
-              <p>Custom PowerShell monitor (<code>thorough-watch.ps1</code>) polling every 60 seconds: modem crash counters, uptime, baseband version, SIM state, <code>qcrilNrd</code> PIDs, battery, temperature. Zero anomalies across 2+ hours.</p>
-            </article>
-            <article class="card">
-              <div class="card-icon"><i class="fas fa-layer-group"></i></div>
-              <h3>Staged Restore with Gates</h3>
-              <p>9.4 GB backup pushed in 5 stages. After each stage: <code>crash_count</code> = 0, uptime increasing, baseband persistent. All 5 gates passed — 3,452 files, 100% count match.</p>
-            </article>
-            <article class="card">
-              <div class="card-icon"><i class="fas fa-search"></i></div>
-              <h3>Deep Subsystem Scan</h3>
-              <p>All 6 subsystems verified (<code>subsys0</code> ADSP through <code>subsys5</code> Venus). No <code>ssrdump</code> directory (no modem assertion dumps). One unrelated thermal HAL tombstone at boot, never recurred.</p>
-            </article>
           </div>
         </section>
 
@@ -1007,41 +741,31 @@ subsys5: 0</span></code></pre>
         <section id="faq" class="section">
           <div class="section-header">
             <h2>Frequently Asked Questions</h2>
-            <p>Quick answers — full details in the <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/09-faq.md" target="_blank" rel="noopener">GitHub FAQ</a>.</p>
           </div>
-
           <div class="faq">
             <details class="faq-item">
               <summary><span>Will this fix survive OTA updates?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content">Yes. OTA updates rewrite AP partitions (<code>boot</code>, <code>dtbo</code>, <code>vendor_boot</code>, <code>super</code>), not <code>modemst1/2</code>. The rebuilt NV persists unchanged.</div>
+              <div class="faq-content">Yes. OTAs rewrite AP partitions (<code>boot</code>, <code>dtbo</code>, <code>vendor_boot</code>, <code>super</code>), not <code>modemst1/2</code>. The rebuilt NV persists.</div>
             </details>
             <details class="faq-item">
               <summary><span>Can I do this without unlocking the bootloader?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content">No. <code>fastboot erase modemst1/modemst2</code> is explicitly refused while the bootloader is locked. Motorola's official unlock is required (retail units only).</div>
+              <div class="faq-content">No. <code>fastboot erase modemst1/modemst2</code> is refused while locked. Motorola's official unlock is required.</div>
             </details>
             <details class="faq-item">
               <summary><span>Is my IMEI at risk?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content">The erase wipes the NV store holding IMEI, but the modem rewrites it from the golden <code>fsg</code> partition on first boot. <strong>Record it first</strong> (<code>*#06#</code>) and verify after. Ours matched exactly.</div>
+              <div class="faq-content">The erase wipes the NV store holding IMEI, but modem rewrites it from <code>fsg</code> on first boot. Record it first (<code>*#06#</code>) and verify.</div>
             </details>
             <details class="faq-item">
-              <summary><span>Does a custom ROM (LineageOS, Pixel Experience, etc.) fix this?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content">No. Custom ROMs only replace AP partitions. They never touch <code>modemst1/2</code>. The modem firmware and its NV storage are completely separate from the Android OS.</div>
+              <summary><span>Does a custom ROM fix this?</span><i class="fas fa-chevron-down"></i></summary>
+              <div class="faq-content">No. Custom ROMs only replace AP partitions — never touch <code>modemst1/2</code>. Modem firmware and NV are separate from Android OS.</div>
             </details>
             <details class="faq-item">
               <summary><span>Factory reset appeared to work for 3 hours — why?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content">Factory reset re-provisions the modem stack (rewrites <code>/data/vendor/radio</code>, clears telephony DB), which temporarily masks corrupt NV. But it never touches <code>modemst1/2</code>, so the corruption persists and the loop returns.</div>
-            </details>
-            <details class="faq-item">
-              <summary><span>What is the <code>qcrilNrd</code> crash really?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content">A <strong>symptom</strong>, not the cause. The modem's QMI services vanish due to corrupt NV. Motorola's <code>libmotext_inf.so</code> then dereferences a token for a dead connection (<code>-254</code> used as pointer) → <code>SIGSEGV</code> in <code>qcrilNrd</code> → <code>system_server</code> blocks → watchdog reboot.</div>
+              <div class="faq-content">Factory reset re-provisions the modem stack, temporarily masking corrupt NV. It never touches <code>modemst1/2</code>, so the loop returns.</div>
             </details>
             <details class="faq-item">
               <summary><span>Can I relock the bootloader after the fix?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content"><strong>No.</strong> Relocking with a modified boot chain (erased <code>modemst1/2</code> = modified vendor state) will hard-brick the device. Leave it unlocked permanently.</div>
-            </details>
-            <details class="faq-item">
-              <summary><span>Is this fix specific to build V1UGS35H.75-14-9-3-1-4?</span><i class="fas fa-chevron-down"></i></summary>
-              <div class="faq-content">The root cause (corrupt <code>modemst1/2</code>) and fix (erase both) are build-agnostic for any <code>fogos</code> device. The exact baseband version may differ; verify <code>gsm.version.baseband</code> is present after reboot.</div>
+              <div class="faq-content"><strong>No.</strong> Relocking with a modified boot chain will hard-brick the device. Leave it unlocked.</div>
             </details>
           </div>
         </section>
@@ -1050,14 +774,13 @@ subsys5: 0</span></code></pre>
         <section id="full-docs" class="section">
           <div class="section-header">
             <h2>Full Documentation & Resources</h2>
-            <p>Every step, script, log, and decision — sanitised, reproducible, and open source.</p>
+            <p>Every step, script, log, and decision — sanitised, reproducible, open source.</p>
           </div>
-
           <div class="resource-grid">
             <article class="resource-card">
               <h3><i class="fas fa-book"></i> Start Here</h3>
               <ul>
-                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/00-requirements.md" target="_blank" rel="noopener">Requirements & Pre-flight Checklist</a></li>
+                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/00-requirements.md" target="_blank" rel="noopener">Requirements & Checklist</a></li>
                 <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/05-tutorial.md" target="_blank" rel="noopener">Step-by-Step Tutorial</a></li>
               </ul>
             </article>
@@ -1077,23 +800,10 @@ subsys5: 0</span></code></pre>
               </ul>
             </article>
             <article class="resource-card">
-              <h3><i class="fas fa-robot"></i> AI-Assisted Debugging</h3>
-              <ul>
-                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/docs/11-ai-assisted-debugging.md" target="_blank" rel="noopener">How We Used AI + ADB</a></li>
-              </ul>
-            </article>
-            <article class="resource-card">
               <h3><i class="fas fa-code"></i> Scripts & Evidence</h3>
               <ul>
-                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/tree/main/scripts/adb" target="_blank" rel="noopener">ADB Scripts</a> (collect, verify, debloat)</li>
-                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/tree/main/evidence" target="_blank" rel="noopener">Sanitised Logs</a> (crash, timeline, snapshot)</li>
-              </ul>
-            </article>
-            <article class="resource-card">
-              <h3><i class="fas fa-shield-alt"></i> Safety & Legal</h3>
-              <ul>
-                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/PRIVACY.md" target="_blank" rel="noopener">Privacy/Redaction Checklist</a></li>
-                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/LICENSE" target="_blank" rel="noopener">License (MIT / CC BY 4.0)</a></li>
+                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/tree/main/scripts/adb" target="_blank" rel="noopener">ADB Scripts</a></li>
+                <li><i class="fas fa-check"></i> <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/tree/main/evidence" target="_blank" rel="noopener">Sanitised Logs</a></li>
               </ul>
             </article>
           </div>
@@ -1107,10 +817,8 @@ subsys5: 0</span></code></pre>
             <i class="fab fa-github"></i> View Full Repository on GitHub
           </a>
         </section>
-
       </article>
 
-      </div>
     </div>
   </main>
 
@@ -1123,107 +831,38 @@ subsys5: 0</span></code></pre>
         <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/issues" target="_blank" rel="noopener">Report Issue</a>
         <a href="https://github.com/bnbcast/motorola-g45-bootlooping-keep-restarting-fix/blob/main/README.id.md" target="_blank" rel="noopener">Bahasa Indonesia</a>
       </div>
-
       <div class="disclaimer">
         <strong>Disclaimer:</strong> Flashing, wiping, and <code>fastboot erase</code> can brick your device or void warranty. This guide is provided <strong>as-is, with no warranty</strong>. You are responsible for your own device and data. Not affiliated with Motorola, Qualcomm, or Google.
       </div>
-
-      <p class="ai-notice">
-        <i class="fas fa-robot"></i>
-        This repository was written by the owner together with an <strong>AI coding agent</strong> (DeepSeek V4.1 Flash via OpenCode).
-        The evidence is published so you can verify the reasoning instead of trusting it.
-      </p>
-
+      <p class="ai-notice"><i class="fas fa-robot"></i> Written by the owner together with an <strong>AI coding agent</strong> (DeepSeek V4.1 Flash via OpenCode). Evidence published so you can verify the reasoning.</p>
       <p class="copyright">© 2026 bnbcast. Built with <i class="fas fa-heart" style="color: var(--danger);"></i> for the <code>fogos</code> community.</p>
     </div>
   </footer>
 
   <script>
-    // Copy code block
-    function copyCode(btn) {
-      const targetId = btn.dataset.target;
-      const code = document.getElementById(targetId).textContent;
-      navigator.clipboard.writeText(code).then(() => {
-        const original = btn.textContent;
-        btn.textContent = 'Copied!';
-        btn.style.color = 'var(--success)';
-        btn.style.borderColor = 'var(--success)';
-        setTimeout(() => {
-          btn.textContent = original;
-          btn.style.color = '';
-          btn.style.borderColor = '';
-        }, 2000);
-      }).catch(() => {
-        btn.textContent = 'Failed';
-        setTimeout(() => btn.textContent = 'Copy', 2000);
-      });
-    }
-
-    // FAQ smooth open/close
-    document.querySelectorAll('details.faq-item').forEach(detail => {
-      detail.addEventListener('toggle', () => {
-        if (detail.open) {
-          detail.querySelector('.faq-content').style.animation = 'fadeIn 0.2s ease';
-        }
-      });
-    });
-
-    // Add fadeIn keyframes
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-8px); }
-        to { opacity: 1; transform: translateY(0); }
-      }
-    `;
-    document.head.appendChild(style);
-
-    // Active TOC link highlighting on scroll
-    const tocLinks = document.querySelectorAll('.toc a');
-    const sections = Array.from(tocLinks).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
-
-    // Track which section is currently active
+    // TOC active link highlighting
+    const tocLinks = document.querySelectorAll('.toc-list a');
+    const sections = Array.from(tocLinks).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
     let currentActive = null;
-
     const observer = new IntersectionObserver((entries) => {
-      // Find the section with the highest intersection ratio (most visible)
-      let bestEntry = null;
-      let bestRatio = -1;
-
-      entries.forEach(entry => {
-        if (entry.isIntersecting && entry.intersectionRatio > bestRatio) {
-          bestRatio = entry.intersectionRatio;
-          bestEntry = entry;
-        }
-      });
-
-      if (bestEntry) {
-        const newActive = bestEntry.target.id;
-        if (newActive !== currentActive) {
-          currentActive = newActive;
-          // Update all links
-          tocLinks.forEach(link => {
-            const isActive = link.getAttribute('href') === `#${newActive}`;
-            link.classList.toggle('active', isActive);
-          });
+      let best = null, bestRatio = -1;
+      entries.forEach(e => { if (e.isIntersecting && e.intersectionRatio > bestRatio) { bestRatio = e.intersectionRatio; best = e; } });
+      if (best) {
+        const id = best.target.id;
+        if (id !== currentActive) {
+          currentActive = id;
+          tocLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + id));
         }
       }
-    }, { 
-      rootMargin: '-90px 0px -50%',  // Account for sticky header (72px) + some buffer
-      threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0]  // Multiple thresholds for better detection
-    });
+    }, { rootMargin: '-100px 0px -50%', threshold: [0, 0.1, 0.25, 0.5, 0.75, 1] });
+    sections.forEach(s => observer.observe(s));
 
-    sections.forEach(section => observer.observe(section));
-
-    // Smooth scroll for TOC links
+    // Smooth scroll
     tocLinks.forEach(link => {
       link.addEventListener('click', (e) => {
         e.preventDefault();
-        const target = document.querySelector(link.getAttribute('href'));
-        if (target) {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          history.pushState(null, '', link.getAttribute('href'));
-        }
+        const t = document.querySelector(link.getAttribute('href'));
+        if (t) { t.scrollIntoView({ behavior: 'smooth', block: 'start' }); history.pushState(null, '', link.getAttribute('href')); }
       });
     });
   </script>
