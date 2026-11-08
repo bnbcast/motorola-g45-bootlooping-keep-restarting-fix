@@ -1160,14 +1160,36 @@ subsys5: 0</span></code></pre>
     const tocLinks = document.querySelectorAll('.toc a');
     const sections = Array.from(tocLinks).map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
 
+    // Track which section is currently active
+    let currentActive = null;
+
     const observer = new IntersectionObserver((entries) => {
+      // Find the section with the highest intersection ratio (most visible)
+      let bestEntry = null;
+      let bestRatio = -1;
+
       entries.forEach(entry => {
-        const link = document.querySelector(`.toc a[href="#${entry.target.id}"]`);
-        if (link) {
-          link.classList.toggle('active', entry.isIntersecting);
+        if (entry.isIntersecting && entry.intersectionRatio > bestRatio) {
+          bestRatio = entry.intersectionRatio;
+          bestEntry = entry;
         }
       });
-    }, { rootMargin: '-100px 0px -66%', threshold: 0 });
+
+      if (bestEntry) {
+        const newActive = bestEntry.target.id;
+        if (newActive !== currentActive) {
+          currentActive = newActive;
+          // Update all links
+          tocLinks.forEach(link => {
+            const isActive = link.getAttribute('href') === `#${newActive}`;
+            link.classList.toggle('active', isActive);
+          });
+        }
+      }
+    }, { 
+      rootMargin: '-90px 0px -50%',  // Account for sticky header (72px) + some buffer
+      threshold: [0, 0.1, 0.25, 0.5, 0.75, 1.0]  // Multiple thresholds for better detection
+    });
 
     sections.forEach(section => observer.observe(section));
 
