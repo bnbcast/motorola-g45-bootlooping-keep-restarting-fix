@@ -57,7 +57,9 @@ The reboot interval is the scarce resource. Every second spent unlocking is a se
 **Catch 4 — some apps refuse.** Banking and work-profile apps may refuse to run without a secure lock. That is temporary; restore the lock afterwards.
 
 
-> **Root is not required.** Neither is an unlocked bootloader. The documented fix works on a stock, locked device.
+> **The real fix needs an unlocked bootloader.** `fastboot erase modemst1/modemst2` is refused while the bootloader is locked, and Motorola only unlocks retail units. See [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md#unlocking-the-bootloader). Root is **not** required.
+>
+> A factory reset does **not** fix this — it held for ~3 hours on the reference device. If you cannot unlock, the realistic options are a service centre or a data-preserving workaround (Wi-Fi-only), not a repair.
 
 ---
 
@@ -86,7 +88,7 @@ See [`06-backup.md`](06-backup.md) for how to export each one.
 | **Android SDK Platform-Tools** | ✅ Yes | `adb`, `fastboot` | ~15 MB |
 | **Motorola / Google USB driver** | ✅ Windows | Lets Windows see the phone in ADB and fastboot mode | ~10–30 MB |
 | **7-Zip** | Recommended | Extracting firmware and tool zips | ~2 MB |
-| **Motorola Rescue and Smart Assistant (LMSA)** | Only if Fix 1 fails | Full firmware flash with a locked bootloader | ~200 MB + 2–5 GB firmware |
+| **Motorola Rescue and Smart Assistant (LMSA)** | Only if the NV erase (Fix 1) fails | Full firmware flash with a locked bootloader — does **not** touch `modemst1/2` | ~200 MB + 2–5 GB firmware |
 | **gnirehtet** | Only if the phone has no Wi-Fi/SIM | Internet over USB while you back up | ~5 MB |
 | **Canta + Shizuku** | Optional | No-root debloat UI | ~20 MB |
 | **SMS Backup & Restore** (on the phone) | Recommended | SMS/call-log backup | ~10 MB |
@@ -182,19 +184,20 @@ Copy this into your notes and tick it before you wipe anything.
 [ ] 2–4 hours of uninterrupted time
 ```
 
-If any box is unticked, fix that before starting the reset. The reset itself takes 5 minutes; the preparation is what protects you.
+If any box is unticked, fix that before you start. The unlock itself wipes the phone in a few minutes; the preparation is what protects you.
 
 ---
 
 ## What you do **not** need
 
 - ❌ Root
-- ❌ An unlocked bootloader
 - ❌ A custom ROM or custom recovery
 - ❌ A paid repair tool
 - ❌ A Linux machine
 - ❌ Opening the phone
 - ❌ A service centre (unless the documented fixes fail)
+
+✅ **An unlocked bootloader — this one you DO need.** It is a precondition for `fastboot erase modemst1/modemst2`. Motorola only unlocks retail units.
 
 ---
 

@@ -58,13 +58,15 @@ It also explains the confusing "everything is broken" feeling: SIM, data, Wi-Fi 
                   → Android 15 installed, loop PERSISTS
 2026-11-06 ~19:00 Latest security-patch build (…-9-13) flashed
                   → loop PERSISTS, identical signature
-2026-11-06 20:00  Factory reset #1 via Recovery → stable
+2026-11-06 20:00  Factory reset #1 via Recovery → stable for ~3 hours, then loop returns
 2026-11-06 21:00  27 min uptime, 0 crashes, native LTE, all packages re-enabled
 2026-11-06 ~22:00 Factory reset #2, to confirm it was not luck → still stable
-2026-11-07        Reboot test: 18+ min, 0 crashes. Closed.
+2026-11-07        Reboot test: 18+ min, 0 crashes. Looked closed.
+2026-11-08        Bootloader unlocked; erase modemst1 + modemst2
+                  → baseband back, LTE + voice, IMEI intact, crash_count 0
 ```
 
-Note the shape of it: **the loop did not start after an update.** It started while the phone was simply sitting there with two SIMs registered, and it survived **three different firmware flashes** (Android 15 OTA path, latest full firmware via Software Fix, latest security-patch build). That combination — survives flashing, dies on wipe — is the signature of **state**, not of a bad image.
+Note the shape of it: **the loop did not start after an update.** It started while the phone was simply sitting there with two SIMs registered, and it survived **three different firmware flashes** (Android 15 OTA path, latest full firmware via Software Fix, latest security-patch build) and **two factory resets**. Only erasing the modem's NV store fixed it — which is the signature of **corrupt persistent state**, not of a bad image.
 
 ---
 
@@ -124,7 +126,7 @@ Rule these out before you wipe anything.
 
 ### Corrupt `/data` from a single bad app
 - Symptom: safe mode is stable, normal boot loops.
-- **Related, but different**: safe mode was *not* stable here. Still, a factory reset fixes both.
+- **Related, but different**: safe mode was *not* stable here, and a factory reset only delayed the loop by ~3 hours. Corrupt modem NV also presents this way — check the modem crash counter ([`02`](02-diagnosis.md)) before blaming `/data`.
 
 ### "com.android.phone isn't responding" dialog on every boot
 Seen during this incident. It is a *symptom*, not the cause: `telephony` and `qcrilNrd` are wedged, so the dialer/phone process ANRs. Do not chase the dialog — chase `qcrilNrd`.
@@ -140,15 +142,21 @@ Phone reboots every few minutes
 │
 └─ yes
    │
+   ├─ subsys2/crash_count climbing with the SIM out and /data wiped ?
+   │     │
+   │     ├─ yes ──> corrupt modem NV → docs/12-confirmed-fix-nv-repair.md
+   │     │
+   │     └─ no ───> keep reading the crash buffer and dmesg
+   │
    ├─ logcat -b crash shows qcrilNrd + libmotext_inf.so ?
    │     │
-   │     ├─ yes ──> THIS BUG → docs/04-fixes.md
+   │     ├─ yes ──> this signature, but check subsys2 first — the RIL crash is a symptom
    │     │
    │     └─ no ───> different crash. Read the tombstone, search the process name.
    │
    └─ No ADB, no crash buffer?
-         └─ Still do the backup (06) then try the factory reset (04). It is the
-            lowest-risk fix that resolves most telephony-related loops.
+         └─ Still do the backup (06), then unlock and try the NV repair (12). A factory
+            reset (04) only delays this fault; it does not fix it.
 ```
 
 ---
@@ -157,10 +165,12 @@ Phone reboots every few minutes
 
 Do not declare victory after one clean boot. The reference device was only considered fixed after:
 
-- **27 minutes** of uptime immediately after the reset
-- a **second reboot** with **18+ minutes** uptime
-- **0** `qcrilNrd` entries in `logcat -b crash`
-- native LTE up (`Active default network: 102`), HTTP 204 / HTTPS 200
+- `subsys2/crash_count` staying at **0** with a SIM in and the phone idle
+- **baseband present** (`gsm.version.baseband` non-empty)
+- `IN_SERVICE` on LTE, mobile data connected, and a **voice call that works**
+- the **IMEI unchanged** from what was recorded before the repair
+- `qcrilNrd` PIDs surviving — no restarts, **0** entries in `logcat -b crash`
+- a **deliberate reboot** with the same results
 - **all 13 previously disabled packages re-enabled** — proving the packages were never the cause
 
 Use [`../scripts/adb/verify-stability.ps1`](../scripts/adb/verify-stability.ps1) to check the same criteria.

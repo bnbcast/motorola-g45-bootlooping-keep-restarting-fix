@@ -1,17 +1,46 @@
 # 03 — Root cause: what actually broke
 
-This is the technical core of the report. It explains the crash, the trigger, why every "obvious" fix failed, and why a factory reset worked. It also corrects one claim from the original field notes.
+> [!IMPORTANT]
+> **Corrected 2026-11-08 — the theory on this page was wrong.**
+>
+> This page originally argued that the trigger was **stale AP-side telephony state in
+> `/data`**, permanently cleared by a factory reset. That was disproven on the same
+> device:
+>
+> - the factory reset **did not hold** — the loop returned about **three hours later**;
+> - the modem kept asserting with `/data` wiped and **both SIMs removed**;
+> - `subsys2/crash_count` (modem) climbed while every other subsystem stayed at `0`.
+>
+> The real cause is **corrupt NV in `modemst1` / `modemst2`**, and the real fix is
+> **erasing those two partitions** after unlocking the bootloader.
+>
+> **Read [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md) first.** The
+> text below is kept as a record of the reasoning that led there, with inline
+> corrections. The crash mechanics (the token bug, the watchdog) are still accurate —
+> it is the *trigger* and the *fix* that changed.
+
+This is the technical core of the report. It explains the crash, the trigger, why every "obvious" fix failed, and why a factory reset appeared to work.
 
 ---
 
 ## The short version
 
-1. Motorola's `libmotext_inf.so` has a **use-after-free** in its oemhook send path.
-2. The bug is harmless while the telephony stack is in a consistent state.
-3. On this device, **stale telephony/modem state in `/data`** put the stack in an inconsistent state, so the modem's routine unsolicited messages began hitting the freed pointer.
-4. Each hit kills `qcrilNrd`. The framework blocks on it. The **watchdog** reboots the phone after ~60 s.
-5. Flashing new Android images did not clear the stale state, because **userdata was preserved**.
-6. A **factory reset** cleared it. The bug is still in the binary; it is simply not triggered any more.
+1. **The modem's NV database (`modemst1` / `modemst2`) was corrupt.**
+2. On every boot the modem failed its own consistency check, asserted, and reset
+   (`subsys2/crash_count++`).
+3. When the modem goes down, its QMI services vanish and `qcrilNrd`'s oemhook token
+   table goes stale.
+4. The next oemhook send dereferences the failure code `0xffffffffffffff02` (`-254`) and
+   `qcrilNrd` dies with `SIGSEGV`.
+5. The framework blocks on a Binder call that will never return. The **watchdog** reboots
+   the phone after ~60 s. Loop.
+6. Flashing Android images never helped because the fault is in the modem's **NV data**,
+   which no image flash touches.
+7. **Erasing `modemst1` + `modemst2`** makes the modem rebuild NV from the golden `fsg`
+   partition. That fixed it. IMEI survived, LTE and voice came back.
+
+> The `libmotext_inf.so` / `qcrilNrd` crash is a **symptom**. Patching it would stop the
+> bootloop and leave you with a phone that has no cellular.
 
 ---
 
@@ -89,13 +118,15 @@ The oemhook agent keeps a **token table** mapping RIL-side message tokens to OEM
 
 ---
 
-## The trigger: stale state, not a bad binary
+## The trigger: corrupt modem NV
 
-This is the part the original field notes simplified. The report said:
+> **This section was rewritten on 2026-11-08.** The original text argued the trigger was
+> AP-side state in `/data`. It was not. See
+> [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md).
 
-> *"Factory reset cleared corrupt modem NVRAM."*
-
-That is **directionally right but technically imprecise**, and the imprecision matters if you are deciding what to do next.
+The original field notes said *"Factory reset cleared corrupt modem NVRAM."* That turned
+out to be **closer to the truth than the correction that replaced it** — but a factory
+reset does not actually touch modem NVRAM, which is exactly why the reset did not last.
 
 ### What a factory reset actually wipes
 
@@ -110,15 +141,27 @@ That is **directionally right but technically imprecise**, and the imprecision m
 | `fsg` — modem filesystem backup | **No** |
 | Modem firmware image (`NON-HLOS`/`modem`) | **No** |
 
-So a plain recovery reset does **not** touch the modem's own NVRAM partitions. What it *does* wipe is the **AP-side telephony state that drives the oemhook conversation**.
+So a plain recovery reset does **not** touch the modem's own NVRAM partitions. That is
+the whole problem: the corrupt data survives the reset, so the modem asserts again on the
+next boot.
 
-### The most likely mechanism, ranked
+### What was actually going on, ranked
 
-1. **`/data/vendor/radio` + telephony databases were inconsistent.** A stale subscription/APN/carrier-config entry made the framework and modem disagree about the current operator/RAT/data state. Every `UpdateOperator` / `RegRAT` indication then carried a token the agent had already retired. Wiping the state restarts the conversation from a clean, self-consistent baseline. **This is the best-supported explanation** — it also explains why preserving `/data` (the "no factory delete" flash) kept the loop.
-2. **A half-finished OTA left the modem/framework state machine out of sync.** The 1.97 GB Android 15 download stalled at 37 % before the LMSA flash. An interrupted OTA can leave `carrierconfig`/`radio` state inconsistent even when the final images are correct.
-3. **Modem NVRAM *was* affected** (the original hypothesis). Possible if the reset triggered a modem re-provisioning on first boot, but there is no direct evidence: no `modemst` dump was taken before and after. Treat this as unproven.
+1. **`modemst1` / `modemst2` held corrupt or inconsistent NV items.** The modem failed its
+   boot-time consistency check and asserted. **This is the confirmed cause** — erasing both
+   partitions and rebuilding from `fsg` fixed the device completely.
+2. **`/data/vendor/radio` + telephony databases were inconsistent.** *Disproven as the
+   cause.* `/data` was wiped twice and the modem still asserted. This state may have
+   amplified the crash rate, but it was not the trigger.
+3. **A half-finished OTA left state out of sync.** Possible contributor to *how* the NV
+   got written badly, but not the fault itself.
 
-> **Why this correction matters:** if you believe only modem NVRAM matters, you might try a modem-only erase (`fastboot erase modemst1/modemst2`) and skip the userdata wipe. That is riskier (it can destroy IMEI provisioning) and, based on the evidence, unnecessary. **Wipe userdata first.**
+> **Why this matters:** the earlier advice here — "wipe userdata first, do not touch
+> `modemst`" — was **wrong for this device**. Wiping userdata did not fix it. The modem-only
+> erase did.
+>
+> The IMEI risk is real but manageable: **record your IMEI (`*#06#`) before erasing**, then
+> confirm it is unchanged afterwards. The rebuild copies it from `fsg`.
 
 ### Why the crash started when it did
 
@@ -132,12 +175,13 @@ That ordering is the strongest clue available. The modem/RIL layer failed **firs
 
 The most plausible sequence is:
 
-1. Something pushed the modem/telephony state into an inconsistent configuration (a modem assertion, a carrier-config push, a SIM re-registration race, or an OTA staging operation). The device had a pending OTA and two SIMs in DSDS — both increase oemhook traffic.
-2. `qcrilNrd` hit the token bug and died. SIM registration dropped.
-3. The framework kept retrying; each retry hit the bug again. Wi-Fi init never completed.
-4. The watchdog rebooted. The stale state persisted across reboots, so the loop repeated.
+1. Something corrupted the modem's NV database — an interrupted NV write (power loss, aborted OTA staging), or a failing storage block under `modemst`. The device had a pending OTA and two SIMs in DSDS, both of which increase NV write traffic.
+2. On the next boot the modem failed its own consistency check and **asserted** (`subsys2/crash_count++`). Its QMI services disappeared.
+3. `qcrilNrd` kept a token that referred to the dead connection; the next oemhook send dereferenced the failure code and it died. SIM registration dropped.
+4. The framework kept retrying; each retry hit the same dead path. Wi-Fi init never completed.
+5. The watchdog rebooted. The corrupt NV persisted across reboots, so the loop repeated.
 
-We cannot prove which event poisoned the state. We *can* prove that clearing the state stopped the crashes — and that flashing new images three times did not.
+We cannot prove which event wrote the bad NV. We *can* prove that rebuilding it stopped the crashes — and that flashing new images three times and resetting twice did not.
 
 ---
 
@@ -145,47 +189,57 @@ We cannot prove which event poisoned the state. We *can* prove that clearing the
 
 | Attempt | Result | Explanation |
 |---|---|---|
-| **Android 15 OTA** | Loop persisted | Updated system/vendor images, **preserved userdata**. Same bug, same trigger. |
-| **LMSA / "Software Fix", latest full firmware** | Loop persisted | Full firmware download and flash. Preserved userdata by default → preserved `/data/vendor/radio` and telephony DBs. |
-| **Latest security-patch build (`…-9-13`)** | Loop persisted, identical signature | Newer build, same vendor library, same stale state. |
-| **LMSA rescue, "no factory delete"** | Loop persisted | By design preserves userdata. The report's claim that it "skips modem firmware" is **not established**; what it definitely skips is the wipe. |
+| **Android 15 OTA** | Loop persisted | Replaced system/vendor images. `modemst1/2` were untouched. |
+| **LMSA / "Software Fix", latest full firmware** | Loop persisted | Full firmware download and flash, but **userdata and NV preserved** — and no image flash rewrites the modem NV store. |
+| **Latest security-patch build (`…-9-13`)** | Loop persisted, identical signature | Newer build, same corrupt NV. |
+| **LMSA rescue, "no factory delete"** | Loop persisted | By design preserves userdata. It also cannot repair `modemst1/2`. |
 | **Disable 13 oemhook packages** | Crashes 14 → ~2 per boot | Apps are *clients* that send oemhook traffic. Removing clients reduces traffic, but the **modem itself** still sends unsolicited indications. Not a fix. |
 | **Airplane mode ON** | Crashes near zero | No radio → no `RegRAT`/`UpdateOperator`/`DataState` events → the hot path is never entered. This is a **workaround**, not a repair. |
 | **Wi-Fi off, animations off, stay-awake** | Marginal | Reduces load and the chance of hitting the watchdog window. Cosmetic. |
 | **ADB reverse tether (gnirehtet)** | Internet restored | Bypasses the broken telephony/Wi-Fi stack entirely. Does not touch the bug. See [`07`](07-internet-without-wifi-or-sim.md). |
-| **Factory reset #1** | **Loop stopped permanently** | Clears the inconsistent AP-side state; first boot re-provisions the modem stack from scratch. |
-| **Factory reset #2** | Still stable | Confirms the first reset was not luck. |
-| **Re-enable all 13 packages after reset** | Still stable | Proves the packages were never the cause. |
+| **Factory reset #1** | Loop stopped **for ~3 hours**, then returned | The reset re-provisioned the modem stack, which temporarily masked the corrupt NV. It does not touch `modemst1/2`, so the fault survived. |
+| **Factory reset #2** | Loop returned again | Confirms the reset is not a fix. |
+| **Re-enable all 13 packages after reset** | No change | Proves the packages were never the cause. |
+| **`fastboot erase modemst1` + `modemst2`** (bootloader unlocked) | **Loop stopped permanently; LTE + voice returned** | The modem rebuilt NV from `fsg`. **This is the fix.** |
 
-> **The pattern is the point:** three different firmware images failed, and one wipe succeeded. If flashing does not fix it, stop flashing and wipe.
+> **The pattern is the point:** three firmware images failed, two factory resets failed, and
+> the only thing that worked was erasing the modem's NV. A reset that "works" for a few hours
+> is not a fix — it is a delay.
 
 ---
 
-## Why the bug can come back
+## Why the fault can come back
 
-The binary is unchanged. `libmotext_inf.so` still has the use-after-free. What changed is the *state*.
+The NV store is rebuilt, not repaired in place. Whether the corruption returns depends on
+*why* it was corrupt in the first place:
 
-Recurrence requires the same precondition: the telephony state must become inconsistent again while the modem emits unsolicited indications. Realistic triggers:
+| Cause | Recurrence |
+|---|---|
+| A one-off interrupted NV write (power loss, aborted update) | **Unlikely** — the erase is a permanent repair |
+| A failing UFS/eMMC block where `modemst` lives | **Likely** — the erase fixes it temporarily, each time |
+| A power/thermal fault affecting the modem's write path | Possible |
 
-- **Restoring old telephony data.** If you restore a full `/data` image (TWRP, `adb` root backup, some "phone clone" tools) you can reintroduce the exact stale state. **Do not restore `/data/vendor/radio` or `telephony.db` from a backup taken during the incident.**
-- **SIM swap / dual-SIM reconfiguration** while the phone is on a flaky network.
+Practical rule: if `subsys2/crash_count` starts climbing again, run the two erases again.
+If that keeps happening, the phone has a storage or board fault, not a software problem.
+
+Other things that can still cause trouble:
+
 - **Another interrupted OTA**, or a carrier-config push.
-- **A modem firmware crash** that leaves the AP-side state stale.
-- **An OTA that changes the vendor library** — could fix it, could expose a new path.
-
-Observed recurrence risk after a clean reset: **low** (the reference device was stable across multiple reboots and days). But it is **not zero**, and it is **not "fixed" in the sense of a patched binary**.
+- **A modem firmware crash** that leaves NV half-written.
+- **Restoring an old full `/data` image** — not the cause here, but it can reintroduce
+  unrelated stale state.
 
 ### If it comes back
 
 ```text
-1. Confirm the signature      → docs/01-symptoms.md
-2. Back up                    → docs/06-backup.md
-3. Factory reset              → docs/04-fixes.md  (worked once, likely works again)
-4. Still looping?             → LMSA full flash WITH factory reset / fastboot stock firmware
-5. Still looping?             → service centre (modem/PMIC hardware)
+1. Confirm the signature          → docs/01-symptoms.md
+2. Check the modem crash counter  → docs/02-diagnosis.md
+3. Re-run the NV repair           → docs/12-confirmed-fix-nv-repair.md
+4. Still looping?                 → flash radio.img, erase modemst1/2 again
+5. Still looping?                 → service centre: read /data/vendor/ssrdump/
 ```
 
-Do **not** start by disabling packages or erasing `modemst`. Those are slower, riskier, and treat symptoms.
+Do **not** start by disabling packages or reinstalling firmware. Those are slower, treat symptoms, and cannot reach the modem's NV store.
 
 ---
 
@@ -196,12 +250,13 @@ The source notes contain two Android 15 build strings:
 | Where | Build |
 |---|---|
 | OTA notification, early notes | `V1UG35H.75-14-4` |
-| Post-LMSA, post-reset verification | `V1UGS35H.75-14-9-3-1-4` |
+| Post-LMSA, post-repair verification | `V1UGS35H.75-14-9-3-1-4` |
 
-The second is the build that was actually running when the device was verified stable, and it matches the `ro.build.fingerprint` captured after the reset. The first is the OTA *package* version that was downloading. They are not contradictory — one is the update payload, the other is the installed build — but they are easy to confuse, so both are recorded here.
+The second is the build that was actually running when the device was verified stable, and it matches the `ro.build.fingerprint` captured after the repair. The first is the OTA *package* version that was downloading. They are not contradictory — one is the update payload, the other is the installed build — but they are easy to confuse, so both are recorded here.
 
 **Android 14 baseline:** `motorola/fogos_gpn/fogos:14/U1UG34.23-110-35/a1cf4-d651b9:user/release-keys`
-**Baseband (unchanged across the incident):** `M6375_HI434_03.562.01.98R FOGOS_PVT_APEM2DSDS_CUST`
+**Baseband before the loop:** `M6375_HI434_03.562.01.98R FOGOS_PVT_APEM2DSDS_CUST`
+**Baseband after the NV repair:** `M6375_HI434_03.562.01.121R`
 
 The crash signature was **byte-for-byte identical** on both Android versions. That is the strongest single piece of evidence that the OS version was irrelevant.
 

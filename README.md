@@ -1,17 +1,22 @@
 > [!IMPORTANT]
 > **This repository was written by AI.** The diagnosis, scripts and documentation were produced by the repository owner working with an **AI coding agent** (DeepSeek V4.1 Flash via OpenCode), then checked against the captured logs.
 >
-> **Want to debug your own phone with it?** Give your AI assistant **this whole repository and its full documentation** — `README.md`, `docs/00`–`docs/11`, `evidence/`, and `scripts/` — and tell it to follow the guide step by step. Then **always verify** what it says against `getprop` and `logcat` before you run anything. Treat AI output as a strong starting point, never as authority.
+> **Want to debug your own phone with it?** Give your AI assistant **this whole repository and its full documentation** — `README.md`, `docs/00`–`docs/12`, `evidence/`, and `scripts/` — and tell it to follow the guide step by step. Then **always verify** what it says against `getprop` and `logcat` before you run anything. Treat AI output as a strong starting point, never as authority.
 
 # Moto G45 5G bootloop full diagnosis, fix and recovery guide
 
 **English** · [Bahasa Indonesia](README.id.md)
 
 **Device:** Motorola Moto G45 5G · `XT2363-9` · codename **`fogos`** · Snapdragon 6s Gen 3 (`SM6375`)
-**Symptom:** phone reboots every **~2 minutes**, forever, and it survived three different firmware flashes
-**Root cause:** a **use-after-free in Motorola's proprietary oemhook library**, triggered by **stale modem/telephony state in `/data`**
-**What actually fixed it:** a **factory reset** — not the OTA, not the latest full firmware, not the latest security-patch build, not the package disables
-**Status:** stable after two consecutive factory resets, zero crashes, 5G + VoLTE working (verified over multiple reboots)
+**Symptom:** phone reboots every **~2 minutes**, forever, and it survived three different firmware flashes and two factory resets
+**Root cause:** **corrupt modem NV in `modemst1` / `modemst2`** — the modem asserts on every boot, and the `qcrilNrd` crash is a symptom of that
+**What actually fixed it:** **erasing `modemst1` + `modemst2`** after unlocking the bootloader, so the modem rebuilt NV from `fsg`
+**Status:** stable, zero modem crashes, LTE data and voice working, IMEI intact — verified on the first boot after the repair, then monitored continuously
+
+> **Correction (2026-11-08).** Earlier versions of this repo said a factory reset was the fix
+> and that stale `/data` state was the trigger. That was **wrong** — the reset held for about
+> three hours and then the loop returned. The real fix is
+> [`docs/12-confirmed-fix-nv-repair.md`](docs/12-confirmed-fix-nv-repair.md).
 
 This repository is the sanitised, reproducible write-up of one device's recovery: what broke, why, what we tried, what worked, what did **not**, and how to protect your data before you wipe.
 
@@ -31,14 +36,14 @@ This is not a phone-only fix. You need a **PC** and a **cable**, and most failur
 | **USB debugging + "Always allow" + screen lock removed** | The boot window is only 1.5–3 minutes; unlocking the phone eats it. Set lock to **None** temporarily |
 | **A direct USB port** (no hub/dock) | Hubs drop connections mid-flash |
 | **Internet on the PC** + **30–60 GB free disk** | Platform-Tools, gnirehtet, 2–5 GB firmware, backups |
-| **Phone charged > 50 %** | First boot after a reset can take 15 minutes |
+| **Phone charged > 50 %** | First boot after the NV erase can take several minutes |
 | **Google account password** | Factory Reset Protection still applies even with no screen lock |
 | **Screen lock PIN known** | You need it to remove the lock, and to restore it afterwards |
 | **2FA seeds exported, backups done** | A wipe deletes them permanently |
 
 **Full checklist, drivers, cable troubleshooting and the "do I have everything?" list:** [`docs/00-requirements.md`](docs/00-requirements.md)
 
-> You do **not** need root, an unlocked bootloader, a custom ROM, or a paid tool.
+> You do **not** need root, a custom ROM, or a paid tool. You **do** need an unlockable bootloader — `fastboot erase modemst1/modemst2` is refused while it is locked.
 
 ---
 
@@ -46,12 +51,13 @@ This is not a phone-only fix. You need a **PC** and a **cable**, and most failur
 
 | # | Do this | Why |
 |---|---|---|
-| 1 | **Back up first** → [`docs/06-backup.md`](docs/06-backup.md) | Factory reset destroys `/data`, including the WhatsApp decryption key and any 2FA authenticator seeds |
+| 1 | **Back up first** → [`docs/06-backup.md`](docs/06-backup.md) | Unlocking the bootloader wipes `/data`, including the WhatsApp decryption key and any 2FA authenticator seeds |
 | 2 | Confirm it's *this* bug → [`docs/01-symptoms.md`](docs/01-symptoms.md) | A 2-minute reboot loop with `qcrilNrd` in the crash buffer is the fingerprint |
 | 3 | Get internet without Wi-Fi/SIM → [`docs/07-internet-without-wifi-or-sim.md`](docs/07-internet-without-wifi-or-sim.md) | `gnirehtet` reverse-tethers the phone through USB — no root, no Wi-Fi, no SIM |
-| 4 | **Factory reset** (Recovery → Wipe data/factory reset) | This is what ended the loop. ~5 minutes |
-| 5 | Still looping? → LMSA full flash **with "factory reset" checked** | Replaces vendor/modem images *and* wipes userdata |
-| 6 | Verify with [`scripts/adb/verify-stability`](scripts/adb/) | Stable = 0 `qcrilNrd` crashes after 10+ min uptime |
+| 4 | **Record your IMEI** — dial `*#06#` and write both numbers down | The repair erases the NV store that holds the IMEI |
+| 5 | **Unlock the bootloader** → [`docs/12`](docs/12-confirmed-fix-nv-repair.md#unlocking-the-bootloader) | `erase modemst1/2` is refused while the bootloader is locked |
+| 6 | **Erase the modem NV** → `fastboot erase modemst1` then `fastboot erase modemst2` | **This is the fix.** The modem rebuilds NV from the golden `fsg` partition |
+| 7 | Verify → `crash_count` stays `0`, baseband present, IMEI unchanged | A single clean boot is not proof — watch it 30 min, then reboot once |
 
 If you have 30 seconds, read the [one-screen explanation](docs/03-root-cause.md#the-short-version).
 
@@ -61,9 +67,9 @@ If you have 30 seconds, read the [one-screen explanation](docs/03-root-cause.md#
 
 ![Android 15, build V1UGS35H.75-14-9-3-1-4, security patch 1 September 2026](assets/android15-latest-build.png)
 
-After the reset: **Android 15**, build `V1UGS35H.75-14-9-3-1-4`, security patch **1 September 2026**, 5G + VoLTE registered, zero `qcrilNrd` crashes.
+After the repair: **Android 15**, build `V1UGS35H.75-14-9-3-1-4`, security patch **1 September 2026**, baseband `M6375_HI434_03.562.01.121R`, `IN_SERVICE` on LTE, mobile data and voice working, **zero modem crashes**.
 
-The phone went through **three separate firmware flashes** before the reset — the Android 15 update, the latest full firmware via Motorola/Lenovo Software Fix, and the newest security-patch build — and looped on all of them. Only wiping userdata fixed it.
+The phone went through **three separate firmware flashes** and **two factory resets** before the real fix. None of them touched `modemst1`/`modemst2`. Erasing those two partitions — which needs an unlocked bootloader — is what restored it.
 
 ---
 
@@ -83,18 +89,19 @@ Signal:   SIGSEGV, SEGV_MAPERR, fault addr 0xffffffffffffff02
 #04  libc.so          __pthread_start
 ```
 
-A freed RIL token (`0xffffffffffffff02` = `-254`, a classic "poisoned" pointer) gets dereferenced. `qcrilNrd` dies. `system_server` blocks on a Binder call that will never return. After ~60 s the **watchdog** kills the system and the phone reboots. Repeat every 2 minutes.
+A token that referred to a modem connection that no longer exists (`0xffffffffffffff02` = `-254`, an error code used as a pointer) gets dereferenced. `qcrilNrd` dies. `system_server` blocks on a Binder call that will never return. After ~60 s the **watchdog** kills the system and the phone reboots. Repeat every 2 minutes.
 
-The bug is *dormant* in a healthy phone. It only fires when the modem emits unsolicited oemhook indications (`RegRAT`, `UpdateOperator`, `DataState`, `APMState`, `VoiceCallCount`) in a state the library does not expect. In this case that state came from **stale telephony data carried over from before the crash loop started**.
+The crash is a **symptom**. Underneath it, the modem's own NV database (`modemst1`/`modemst2`) was corrupt, so the modem asserted on every boot and its QMI services vanished. The library then dereferenced a token for a connection that was already gone.
 
 That is why:
 
-- **The Android 15 OTA did not help** — the vendor partition and modem firmware were unchanged.
-- **The LMSA "no factory delete" flash did not help** — it deliberately preserves `/data`, and the trigger lives in `/data`.
-- **Disabling 13 packages only reduced the crash rate** — apps are a *sender* of oemhook traffic, not the *cause*.
-- **A factory reset fixed it** — it wipes `/data/vendor/radio`, carrier/APN state and first-boot reprovisions the modem stack.
+- **The Android 15 OTA did not help** — it replaces images, never the modem's NV data.
+- **The LMSA flash did not help** — same reason. It rewrites partitions the modem does not read its NV from.
+- **Disabling 13 packages only reduced the crash rate** — apps are a *sender* of oemhook traffic, not the cause.
+- **A factory reset only delayed it** — it re-provisions the modem stack, which masks corrupt NV for a few hours, but never touches `modemst1/2`.
+- **Erasing `modemst1` + `modemst2` fixed it** — the modem rebuilt a clean NV database from the golden `fsg` partition.
 
-Full analysis, including why the popular "factory reset clears modem NVRAM" explanation is imprecise: **[`docs/03-root-cause.md`](docs/03-root-cause.md)**.
+Full analysis, including why a factory reset *appeared* to work and why it did not: **[`docs/03-root-cause.md`](docs/03-root-cause.md)**.
 
 ---
 
@@ -153,12 +160,13 @@ Rules:
 
 The full list, with the lesson for each, is in [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md). The short version:
 
-- Flashing firmware cannot fix a bug that lives in `/data` — three flashes failed.
-- The "factory reset clears modem NVRAM" story is wrong; recovery does not touch `modemst1/2`.
+- **We picked the wrong root cause.** Stale `/data` state looked right because a factory reset appeared to work — for three hours. The reset was masking corrupt modem NV, not fixing it.
+- **We told people not to erase `modemst`.** That warning was wrong. It is the actual fix, once you record the IMEI first.
+- Flashing firmware cannot fix corrupt modem NV — three flashes failed.
 - Disabling packages reduced the crash rate but did not remove the cause — apps are senders, not the trigger.
 - Racing `logcat` in a 2-minute window loses; persistent tombstones win.
 - Burning the boot window on the lock screen wastes the whole window.
-- `fastboot erase modemst1/modemst2` risks permanent IMEI loss for no proven benefit.
+- A "fix" that holds for a few hours is not a fix. Always test across a reboot and across days.
 
 ---
 
@@ -171,7 +179,7 @@ docs/
   00-requirements.md          PC, cable, ADB, drivers, accounts, pre-flight checklist
   01-symptoms.md              recognise this bootloop vs. other causes
   02-diagnosis.md             collect evidence with ADB; read tombstones
-  03-root-cause.md            the bug, the trigger, why each fix behaved as it did
+  03-root-cause.md            the crash mechanics, and the wrong theory (kept for the record)
   04-fixes.md                 ranked fixes + exact steps + what each one destroys
   05-tutorial.md              plain-language walkthrough, start to finish
   06-backup.md                what to back up, what is unrecoverable, how
@@ -180,6 +188,7 @@ docs/
   09-faq.md                   "can it come back?", warranty, root, LineageOS...
   10-evidence-index.md        what is in evidence/ and how it was sanitised
   11-ai-assisted-debugging.md debug with AI + ADB, prompts, and our mistakes
+  12-confirmed-fix-nv-repair.md  THE FIX: unlock, erase modemst1/2, verify
 scripts/
   adb/                        portable .ps1 + .sh: collect, disable, re-enable, verify
   windows/                    tether keeper + watchdog (path-parameterised)
@@ -193,12 +202,15 @@ LICENSE                       MIT (code) / CC BY 4.0 (prose)
 ## The short version of the fix
 
 ```text
-Recovery (Power + Volume Down → "Recovery mode")
-  → Wipe data/factory reset
-  → Reboot system now
+1. Dial *#06# and write both IMEIs down.
+2. Unlock the bootloader (Motorola unlock code; wipes the phone).
+3. fastboot erase modemst1
+   fastboot erase modemst2
+   fastboot reboot
+4. Dial *#06# again — the IMEIs must match.
 ```
 
-Everything else in this repo exists because that sentence is useless if you have not backed up, cannot tell whether your loop is the same bug, or the reset does not work.
+Everything else in this repo exists because that sequence is useless if you have not backed up, cannot tell whether your loop is the same bug, or the erase does not work.
 
 ---
 

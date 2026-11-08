@@ -107,7 +107,7 @@ com.motorola.help
 com.motorola.wifi.motowifimetrics
 
 ================================================================================
-POST-RESET VERIFICATION (after the fix, Android 15)
+POST-RESET VERIFICATION (after factory reset #1 - later shown NOT to be a fix)
 ================================================================================
 uptime                         1608 s (26.8 min)
 qcrilNrd crashes               0
@@ -120,3 +120,21 @@ HTTPS check                    200
 Android version                15
 build                          V1UGS35H.75-14-9-3-1-4
 all 13 packages                re-enabled, still stable
+
+  NOTE (2026-11-08): the loop returned about three hours after a factory reset.
+  This snapshot is kept to show why the reset looked like a fix.
+
+================================================================================
+POST-NV-REPAIR VERIFICATION (after erase modemst1 + modemst2)
+================================================================================
+build                          V1UGS35H.75-14-9-3-1-4
+bootloader                     unlocked (securestate flashing_unlocked)
+gsm.version.baseband           M6375_HI434_03.562.01.121R
+gsm.sim.state                  LOADED
+network registration           IN_SERVICE, LTE (MCC 510 / MNC 11)
+mDataConnectionState           2 (connected); webpage loads
+voice call                     works
+IMEI                           intact, unchanged from pre-repair recording
+qcrilNrd                       original PIDs alive (2092, 2123), no restarts
+subsys2/crash_count            0
+subsys0/1/3/4/5 crash_count    0 (adsp, cdsp, ipa_fws, a615_zap, venus)

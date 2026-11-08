@@ -139,7 +139,9 @@ How to read it:
 - `libmotext_inf.so` — Motorola's "motext" oemhook client. **Proprietary, closed source.** You cannot patch it without reverse engineering, and even then the vendor partition is signed.
 - `qcril_qmi_oemhook_agent_send` — the send path. The modem (or a client app) sent an oemhook message, and the token bookkeeping for it was already stale.
 
-The crash is in **vendor** code, but the trigger is **state**, not the code path itself. That distinction is the whole reason the fix is "wipe the state" rather than "patch the bug".
+The crash is in **vendor** code, but the trigger is **state**, not the code path itself — and the state that matters is the **modem's NV database** (`modemst1`/`modemst2`), not `/data`. That distinction is the whole reason the fix is "rebuild the modem NV" rather than "patch the bug".
+
+> **The crash tells you where it died, not why.** The evidence that identifies the cause is the subsystem crash counter — see [step 5](#5-check-the-subsystem-crash-counters--this-is-the-decisive-evidence).
 
 ---
 
@@ -175,7 +177,35 @@ adb bugreport capture/bugreport.zip
 
 ---
 
-## 5. Watch the boot sequence live
+## 5. Check the subsystem crash counters — this is the decisive evidence
+
+`logcat` tells you *where* the crash happened. The subsystem counters tell you *what* is crashing underneath it.
+
+```bash
+adb shell 'for d in /sys/bus/msm_subsys/devices/subsys*; do echo -n "$d "; cat $d/name 2>/dev/null; echo -n " crash="; cat $d/crash_count; done'
+```
+
+On this device the subsystems are:
+
+| Path | Subsystem |
+|---|---|
+| `subsys0` | `adsp` (audio DSP) |
+| `subsys1` | `cdsp` (compute DSP) |
+| `subsys2` | **`modem`** |
+| `subsys3` | `ipa_fws` |
+| `subsys4` | `a615_zap` |
+| `subsys5` | `venus` |
+
+What it showed here, and what it means:
+
+- **`subsys2` (modem) was climbing** — 2 → 14 with a SIM, and still 2 → 9 with **both SIMs removed** and `/data` wiped.
+- **Every other subsystem stayed at `0`.** No audio, compute, IPA or video crash.
+
+That pattern rules out `/data`, the SIM, an app, and a general SoC/storage fault: the **modem itself is asserting on its own**, before Android has done anything. That points at the modem's persistent NV database (`modemst1`/`modemst2`) and at the repair in [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md).
+
+---
+
+## 6. Watch the boot sequence live
 
 If you want to see the failure happen rather than infer it:
 
@@ -190,18 +220,19 @@ adb logcat -b all -v threadtime | grep -Ei "qcrilNrd|watchdog|system_server|Wifi
 
 What you will see, in order:
 
-1. `qcrilNrd` starts, registers with `qcril` framework.
-2. Modem sends unsolicited indications → `communicationThread` processes them.
-3. `F DEBUG: signal 11` / `libmotext_inf.so` in the tombstone.
-4. `qcrilNrd` restarts; the framework reconnects; another crash ~8 s later.
-5. After ~60 s of blocked Binder calls, `Watchdog: *** WATCHDOG KILLING SYSTEM PROCESS ***`.
-6. Kernel panics or reboots; `ro.boot.bootreason=watchdog` on the next boot.
+1. The **modem asserts** on boot (visible in `dmesg` as a `subsys2`/`mpss` restart, and in `crash_count`).
+2. `qcrilNrd` starts, registers with the `qcril` framework.
+3. Its QMI connection disappears mid-conversation → `communicationThread` processes a stale indication.
+4. `F DEBUG: signal 11` / `libmotext_inf.so` in the tombstone.
+5. `qcrilNrd` restarts; the framework reconnects; another crash ~8 s later.
+6. After ~60 s of blocked Binder calls, `Watchdog: *** WATCHDOG KILLING SYSTEM PROCESS ***`.
+7. Kernel panics or reboots; `ro.boot.bootreason=watchdog` on the next boot.
 
-That sequence — *crash, retry, watchdog, reboot* — is the disease. Everything else (no Wi-Fi, no SIM, "no internet") is downstream.
+That sequence — *modem assert, RIL crash, retry, watchdog, reboot* — is the disease. Everything else (no Wi-Fi, no SIM, "no internet") is downstream.
 
 ---
 
-## 6. Why Wi-Fi and SIM both fail
+## 7. Why Wi-Fi and SIM both fail
 
 This confuses people, because it looks like two separate hardware faults. It is one:
 
@@ -222,8 +253,8 @@ Options, best first:
 1. **Boot far enough to toggle it.** Some loops give 60–90 s of usable UI. Try: boot → immediately open Settings → About phone → tap *Build number* 7× → Developer options → USB debugging. Have the cable already connected and `adb devices` running on the PC.
 2. **Safe mode** (hold Volume Down during boot / long-press Power → Safe mode). If safe mode is stable, enable USB debugging there, then reboot.
 3. **Recovery ADB.** Stock recovery on Motorola exposes `adb sideload` only — no shell, no logcat. Not useful for diagnosis, but useful for applying a signed OTA.
-4. **`fastboot` works without USB debugging** (bootloader unlocked or not, `fastboot devices` sees the device in bootloader mode). You cannot read logs this way, but you *can* reflash stock firmware — see [`04-fixes.md`](04-fixes.md#fix-3-fastboot-stock-firmware-reflash-advanced).
-5. **Factory reset from recovery anyway.** You lose the ability to capture evidence, but the fix does not require ADB. Back up what you can via MTP first ([`06-backup.md`](06-backup.md)).
+4. **`fastboot` works without USB debugging** (`fastboot devices` sees the device in bootloader mode whether or not the bootloader is unlocked). You cannot read logs this way, but you *can* reflash stock firmware — see [`04-fixes.md`](04-fixes.md#fix-5--full-fastboot-stock-firmware-reflash-advanced).
+5. **Unlock the bootloader and do the NV repair without logs.** The repair does not require ADB, only fastboot. Back up what you can via MTP first ([`06-backup.md`](06-backup.md)), then follow [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md).
 
 ---
 

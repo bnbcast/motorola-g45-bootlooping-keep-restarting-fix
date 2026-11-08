@@ -4,9 +4,9 @@ Sanitised captures that support the claims in `docs/`. Nothing here is required 
 
 | File | What it shows | Source |
 |---|---|---|
-| [`../assets/android15-latest-build.png`](../assets/android15-latest-build.png) | Final state: Android 15, build `V1UGS35H.75-14-9-3-1-4`, security patch 1 September 2026, 5G + VoLTE | Settings → Software update |
-| [`crash-signature.txt`](crash-signature.txt) | The `qcrilNrd` tombstone: signal, fault address, full backtrace, triggering indications | `/data/tombstones`, `logcat -b crash` |
-| [`device-snapshot-sanitized.txt`](device-snapshot-sanitized.txt) | Build, bootloader state, modem version, SIM/network state, the 13 disabled packages, post-reset verification | `getprop`, `settings list`, `pm list packages -d` |
+| [`../assets/android15-latest-build.png`](../assets/android15-latest-build.png) | Final state: Android 15, build `V1UGS35H.75-14-9-3-1-4`, security patch 1 September 2026, LTE data + voice working after the NV repair | Settings → Software update |
+| [`crash-signature.txt`](crash-signature.txt) | The `qcrilNrd` tombstone: signal, fault address, full backtrace, triggering indications — a **symptom** of the modem asserting | `/data/tombstones`, `logcat -b crash` |
+| [`device-snapshot-sanitized.txt`](device-snapshot-sanitized.txt) | Build, bootloader state, modem version, SIM/network state, the 13 disabled packages, post-NV-repair verification | `getprop`, `settings list`, `pm list packages -d` |
 | [`tether-log-sanitized.txt`](tether-log-sanitized.txt) | Watchdog log proving the reboot cadence and that USB tethering kept reconnecting | `tether-watchdog.ps1` log |
 | [`timeline.txt`](timeline.txt) | Condensed chronology with evidence pointers | Compiled from the above |
 
@@ -32,6 +32,8 @@ Then manually sanitised per [`../PRIVACY.md`](../PRIVACY.md).
 | Screen recording / screenshots | Show personal accounts and notifications. |
 | WhatsApp backups | Private. Excluded entirely. |
 | Raw firmware files | Multi-GB, copyrighted, and region-specific. Use LMSA to obtain the correct one. |
+| `modemst1` / `modemst2` dump | None was taken. The NV corruption is proven by repair (erase + rebuild), not by inspection — see [`../docs/12-confirmed-fix-nv-repair.md`](../docs/12-confirmed-fix-nv-repair.md). |
+| `/data/vendor/ssrdump/` | SELinux-denied to `adb shell`; the modem's own assertion text is unreadable without root. |
 
 ## Reproducing the evidence on your own device
 

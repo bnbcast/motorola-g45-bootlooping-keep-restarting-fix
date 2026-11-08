@@ -93,11 +93,11 @@ Times are local (WIB, UTC+7). Serial redacted.
 --------------------------------------------------------------------------------
   Flashed the newest security-patch build available
   Bootloop PERSISTED, identical signature
-  Interpretation: three different images, same vendor library, same stale
-  userdata -> same crash. This is state, not image corruption.
+  Interpretation (corrected 2026-11-08): three different images, same crash.
+  The fault is in the modem's NV data, which no image flash writes.
 
 --------------------------------------------------------------------------------
-2026-11-06 20:00  FACTORY RESET #1 (THE FIX)
+2026-11-06 20:00  FACTORY RESET #1 (NOT THE FIX - see 2026-11-08)
 --------------------------------------------------------------------------------
   Recovery -> Wipe data/factory reset -> Reboot
   WhatsApp Drive backup triggered before the wipe
@@ -121,18 +121,54 @@ Times are local (WIB, UTC+7). Serial redacted.
   Result: still stable, still 0 crashes, LTE working
 
 --------------------------------------------------------------------------------
-2026-11-07  REBOOT VALIDATION
+2026-11-07  REBOOT VALIDATION (LOOKED LIKE A FIX - IT WAS NOT)
 --------------------------------------------------------------------------------
   adb reboot -> clean boot
   Uptime 1113+ s (18.5+ min), 0 crashes, LTE working
   ~48 bloatware packages disabled (optional, see docs/08-hardening.md)
-  Conclusion: loop closed
+  Assumed closed at this point. A factory reset later held for only about
+  three hours before the loop returned with the identical signature,
+  falsifying the /data theory.
+
+--------------------------------------------------------------------------------
+2026-11-08  BOOTLOADER UNLOCK + MODEM NV REPAIR (THE ACTUAL FIX)
+--------------------------------------------------------------------------------
+  Motorola approved the unlock for this retail (retid) XT2363-9.
+  fastboot oem unlock -> "(bootloader) Bootloader is unlocked!"
+  securestate: flashing_unlocked, ro.boot.flash.locked=0,
+  verifiedbootstate: orange. The unlock wiped userdata.
+
+  IMEI(s) recorded before the repair (*#06#): both present, Luhn-valid.
+
+  fastboot erase modemst1  -> OKAY [0.139s]
+  fastboot erase modemst2  -> OKAY [0.005s]
+  fastboot reboot          -> OKAY
+
+  First boot: modem rebuilt NV from the golden fsg partition.
+
+--------------------------------------------------------------------------------
+2026-11-08  POST-NV-REPAIR VERIFICATION
+--------------------------------------------------------------------------------
+  subsys2/crash_count: 0 (was climbing 2 -> 14 with a SIM, 2 -> 9 with none)
+  baseband: M6375_HI434_03.562.01.121R
+  gsm.sim.state: LOADED,ABSENT
+  network: IN_SERVICE, LTE (XL Axiata, MCC 510 MNC 11)
+  mDataConnectionState: 2 (connected), webpage loads
+  voice call: works
+  IMEI(s): intact, identical to the recorded values
+  qcrilNrd: original PIDs alive, no restarts
+  other subsystems (adsp/cdsp/ipa_fws/a615_zap/venus): crash_count 0
+
+  Conclusion: corrupt modem NV was the cause. The qcrilNrd SIGSEGV was a
+  symptom of the modem asserting, not the fault itself.
 
 --------------------------------------------------------------------------------
 NOT PROVEN
 --------------------------------------------------------------------------------
-  The exact event that poisoned the RIL token table at 16:43 is unknown.
-  Whether modem NVRAM partitions (modemst1/2, fsg) were affected is unknown —
-  no before/after dump exists. The AP-side /data state explanation is the one
-  best supported by the evidence (it explains why three flashes failed and a
-  wipe succeeded).
+  The exact event that corrupted the modem NV at ~16:43 is unknown - an
+  interrupted NV write, an aborted OTA staging operation, or a failing
+  storage block under modemst are all possible.
+  No before/after modemst1/modemst2 dump exists, so the corruption is proven
+  by repair (erase + rebuild worked), not by inspection.
+  Recurrence risk is unknown: a one-off bad write should not return; a
+  failing UFS/eMMC block would.

@@ -145,29 +145,29 @@ Full checklist: [`PRIVACY.md`](../PRIVACY.md). You can also ask the AI to redact
 
 Every one of these cost time, and two of them could have destroyed the phone.
 
-### 1. Flashing firmware and expecting `/data` to be fixed
+### 1. Concluding that the trigger was in `/data`
 
-We flashed the Android 15 OTA, the latest full firmware, and the newest security build. The loop survived all three.
+This was the expensive mistake. We had a real crash — `qcrilNrd` dying at `0xffffffffffffff02` — and we explained it with stale telephony state in `/data`. A factory reset then "fixed" it, which looked like confirmation.
 
-**Why it was wrong:** a firmware flash replaces system/vendor/modem images. It does not wipe userdata. The trigger was in `/data`.
+**Why it was wrong:** the loop came back about **three hours later**. A reset does not touch `modemst1`/`modemst2`, and the modem's NV database there was corrupt. We had built a self-consistent story on top of a coincidence: the reset re-provisioned the modem stack, which *masked* the fault long enough to be mistaken for a repair.
 
-**Lesson:** if the bug is in `/data`, no amount of flashing fixes it.
+**Lesson:** a fix that holds for hours is not a fix. Test across a reboot, and then across days. And when a "confirmed" cause leaves one anomaly unexplained, keep the old hypothesis on the table.
 
-### 2. Using LMSA "no factory delete"
+### 2. Using LMSA "no factory delete" to preserve the wrong state
 
 The Motorola/Lenovo tool has an option that preserves user data. We used it because it felt safer.
 
-**Why it was wrong:** "safer" meant "keeps the trigger". It re-flashed everything *except* the one partition that mattered.
+**Why it was wrong:** "safer" meant "keeps whatever was in `/data`". But the fault was not in `/data` at all, so the option made no difference either way. It re-flashed everything except the partitions that mattered.
 
-**Lesson:** if the evidence points at userdata, a data-preserving flash is a no-op.
+**Lesson:** a data-preserving flash is a no-op against a fault that is not in user data — and the option is not a diagnosis.
 
-### 3. Believing "factory reset clears modem NVRAM"
+### 3. Repeating the "factory reset clears modem NVRAM" myth — then over-correcting
 
-This is repeated all over forums. It is imprecise. A recovery `Wipe data/factory reset` does **not** touch `modemst1` / `modemst2`.
+Forums say a factory reset clears modem NVRAM. That is **imprecise**: a recovery `Wipe data/factory reset` does **not** touch `modemst1` / `modemst2`.
 
-**What actually changed:** `/data/vendor/radio`, carrier/APN state and telephony databases were wiped, and the modem stack was reprovisioned on first boot. See [`03-root-cause.md`](03-root-cause.md).
+We corrected the myth — and then over-corrected. We concluded the modem's NVRAM could not be involved, when in fact it was the *only* thing involved. The folklore was closer to the truth than our correction.
 
-**Lesson:** a plausible-sounding explanation is not evidence. Check which partitions the operation actually writes.
+**Lesson:** a plausible-sounding explanation is not evidence. Check which partitions the operation actually writes — and do not let debunking one claim rule out the whole area.
 
 ### 4. Treating package disabling as the fix
 
@@ -195,11 +195,13 @@ Without it, every reboot waits for a tap on the phone — which you cannot reach
 
 **Lesson:** authorise the PC once, and remember a factory reset wipes that authorisation.
 
-### 8. Considering `fastboot erase modemst1/modemst2`
+### 8. Refusing to try `fastboot erase modemst1/modemst2`
 
-This was on the table because of the NVRAM myth. It can destroy IMEI provisioning permanently.
+This was on the table for weeks and we kept talking ourselves out of it: it can destroy IMEI provisioning, the bootloader was locked, and our theory said `/data` was the problem.
 
-**Lesson:** never erase modem partitions to fix a software loop. The risk is not worth it, and the evidence did not support it.
+**Why it was wrong:** it was the fix. The IMEI risk is real but manageable — record the IMEI first, erase, confirm it afterwards. The modem rebuilds NV from the golden `fsg` partition, which contains the IMEI.
+
+**Lesson:** "too risky" is not an argument when the alternative is a device that never boots. Quantify the risk, mitigate it (record the IMEI), and test. See [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md).
 
 ### 9. Trusting anecdotal success rates
 
@@ -238,15 +240,20 @@ The WhatsApp decryption key and 2FA seeds live in `/data`. A factory reset destr
 
 ## How the root cause was actually found
 
-The AI did not "solve" it by magic. The sequence was:
+The AI did not "solve" it by magic, and it did not solve it on the first try. The sequence was:
 
 1. `logcat -b crash` showed `qcrilNrd` dying with `SIGSEGV` at `0xffffffffffffff02`.
 2. The backtrace ended in `libmotext_inf.so communicationThread` — a Motorola proprietary library.
 3. The fault address `0xffffffffffffff02` (`-254`) is a classic poisoned pointer, so the AI proposed **use-after-free**.
-4. The trigger was not the app list (disabling packages only slowed it), not the firmware (three flashes failed), and not the modem NVRAM (recovery does not touch it) — it was **stale telephony state in `/data`**.
-5. Prediction: wiping `/data` should stop it. Two factory resets confirmed it.
+4. The AI concluded the trigger was **stale telephony state in `/data`**. Prediction: wiping `/data` stops it. Two factory resets appeared to confirm it — the first held for about three hours.
+5. **The loop came back.** That falsified the hypothesis, which is the step that actually mattered.
+6. The anomaly was the modem crash counter: `/sys/bus/msm_subsys/devices/subsys2/crash_count` was climbing, and it climbed with `/data` wiped **and both SIMs removed**. Only `subsys2` (modem) was affected; every other subsystem stayed at `0`.
+7. That pointed below the RIL: the modem was asserting on its own. `modemst1` / `modemst2` hold its NV database.
+8. Erasing both partitions and letting the modem rebuild from `fsg` fixed it — baseband returned, LTE and voice worked, IMEI intact, `crash_count` stayed at `0`.
 
-Full reasoning: [`03-root-cause.md`](03-root-cause.md). Raw evidence: [`10-evidence-index.md`](10-evidence-index.md).
+The generalisable part: **the crash was the symptom; the subsystem crash counter was the evidence.** `logcat` told us where it died, not why.
+
+Full reasoning: [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md). The superseded theory, kept for the record: [`03-root-cause.md`](03-root-cause.md). Raw evidence: [`10-evidence-index.md`](10-evidence-index.md).
 
 ---
 

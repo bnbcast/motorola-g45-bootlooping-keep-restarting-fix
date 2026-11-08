@@ -1,6 +1,6 @@
 # 08 — Hardening and optional debloat
 
-> **This is not part of the fix.** The phone was stable after the factory reset **before** any debloat, with all 13 packages re-enabled. Debloating is cosmetic/performance tuning. Skipping it changes nothing about the bootloop.
+> **This is not part of the fix.** The phone was stable after the modem NV repair (`erase modemst1`/`modemst2`) **before** any debloat, with all 13 packages re-enabled. Debloating is cosmetic/performance tuning. Skipping it changes nothing about the bootloop.
 
 Read the risks before running anything here.
 
@@ -218,9 +218,9 @@ If the same crash signature returns, go back to [`01-symptoms.md`](01-symptoms.m
 ## OTA policy after the fix
 
 - **Do not disable `com.motorola.ccc.ota`** if you want security patches.
-- Before accepting a major OTA, back up (again). An interrupted OTA is one of the plausible triggers for this bug.
-- After an OTA, verify stability with the same commands.
-- A future OTA *could* ship a fixed `libmotext_inf.so`. Check `getprop ro.build.fingerprint` and the vendor build after updating.
+- Before accepting a major OTA, back up (again). An interrupted OTA is one plausible way the modem NV got corrupted in the first place.
+- After an OTA, verify stability with the same commands — and check `subsys2/crash_count`.
+- An OTA will not repair `modemst1/2`. If the loop ever returns, re-run the NV erase.
 
 ---
 
@@ -228,7 +228,7 @@ If the same crash signature returns, go back to [`01-symptoms.md`](01-symptoms.m
 
 | Action | Recommended? |
 |---|---|
-| Factory reset (the fix) | ✅ Yes |
+| Modem NV erase (`erase modemst1`/`modemst2`) — **the fix** | ✅ Yes |
 | Tier A debloat | ✅ Optional, safe |
 | Tier B debloat | ⚠️ Only if you understand the loss |
 | Tier C debloat | ❌ No |

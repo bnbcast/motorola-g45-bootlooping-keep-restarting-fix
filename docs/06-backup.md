@@ -1,10 +1,10 @@
 # 06 — Backups: what to save before you wipe
 
-A factory reset deletes `/data`. This page tells you exactly what that means, in what order to save things, and how to do it while the phone is rebooting every two minutes.
+Unlocking the bootloader (and a factory reset) deletes `/data`. This page tells you exactly what that means, in what order to save things, and how to do it while the phone is rebooting every two minutes.
 
 ---
 
-## What a factory reset destroys
+## What a factory reset (or an unlock) destroys
 
 | Data | Where it lives | Survives reset? | Recoverable afterwards? |
 |---|---|---|---|
@@ -245,4 +245,4 @@ Before you wipe, confirm all of these exist on the PC **and** are non-zero size:
 - [ ] Password manager recovery kit accessible
 - [ ] You know your Google password and screen lock
 
-Only then run the factory reset.
+Only then unlock the bootloader (or run a factory reset).

@@ -6,23 +6,39 @@ Answers to the questions that come up repeatedly. Technical detail lives in the 
 
 ### Can the bootloop come back?
 
-**Yes, in principle.** The bug is still in `libmotext_inf.so`; only the *trigger* was cleared. Observed risk after a clean reset is **low** (the reference device was stable across multiple reboots and days), but it is not zero. See [recurrence](03-root-cause.md#why-the-bug-can-come-back).
+**Depends on why the NV corrupted.** The confirmed fix rebuilds the modem's NV from `fsg`.
+If the corruption was a one-off (interrupted write, power loss), it should not return. If the
+storage block holding `modemst` is failing, it will — and the same two `erase` commands will
+fix it again, each time. See [recurrence](12-confirmed-fix-nv-repair.md#recurrence).
+
+### What actually fixed it?
+
+**Erasing `modemst1` and `modemst2`** with an unlocked bootloader, so the modem rebuilt its NV
+database from `fsg`. Not a factory reset — that only held for ~3 hours. See
+[`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md).
 
 ### Does updating to Android 15 fix it?
 
-**No.** The crash signature was byte-for-byte identical on Android 14 (`U1UG34.23-110-35`) and Android 15 (`V1UGS35H.75-14-9-3-1-4`). The faulty library is in the **vendor** partition and was not changed by the update.
+**No.** The crash signature was byte-for-byte identical on Android 14 (`U1UG34.23-110-35`) and Android 15 (`V1UGS35H.75-14-9-3-1-4`). The fault is in the modem's NV data, which no update rewrites.
 
 ### Does the official OTA fix it?
 
-**No.** It replaces system images and preserves userdata — the exact combination that keeps the trigger. This incident included a 1.97 GB Android 15 OTA attempt that did not help.
+**No.** An OTA replaces system and vendor images. It never writes `modemst1`/`modemst2`, so corrupt modem NV survives it. This incident included a 1.97 GB Android 15 OTA attempt that did not help.
 
-### Why did the factory reset work if it does not touch modem NVRAM?
+### Why did the factory reset appear to work if it does not touch modem NVRAM?
 
-Because the trigger was most likely **AP-side telephony state in `/data`** (`/data/vendor/radio`, `telephony.db`, carrier overrides), not the modem's own NVRAM partitions. A recovery reset wipes the former and leaves the latter. The original field notes called it "cleared modem NVRAM"; that is a useful shorthand but not literally what a factory reset does. Full explanation: [`03-root-cause.md`](03-root-cause.md#the-trigger-stale-state-not-a-bad-binary).
+Because it **didn't** really work — it delayed the failure. On the reference device the loop
+stopped for about **three hours** and then returned. A reset re-provisions the modem stack on
+first boot, which temporarily masks corrupt NV, but it never touches `modemst1/2`, so the
+fault survives. The real fix is
+[erasing those two partitions](12-confirmed-fix-nv-repair.md).
 
 ### I flashed the latest firmware / security patch and it still loops. Why?
 
-Because flashing replaces **images**, and this bug lives in **state**. On the reference device three separate images were tried — the Android 15 update, the latest full firmware via Motorola/Lenovo Software Fix, and the newest security-patch build (`…-9-13`) — and all three looped with the identical signature. The vendor library is the same in all of them, and userdata (where the trigger lives) was preserved. Wipe userdata.
+Because the fault is in the modem's **NV data**, not in any image. Firmware flashes replace
+`boot`, `vendor`, `super` and sometimes `radio` — none of which is `modemst1`/`modemst2`. On
+the reference device three separate images were tried and all three looped with the identical
+signature. The fix is [erasing the NV stores](12-confirmed-fix-nv-repair.md).
 
 ### Do I really need to remove my screen lock?
 
@@ -32,21 +48,54 @@ For the **recovery window**, yes — it is the difference between having 2 minut
 
 It stores your PC's ADB key in `/data/misc/adb/adb_keys`, so you are not asked to tap **Allow** on every reboot. With a 1.5–3 minute window, a single missed prompt can cost you an entire boot. Note that a factory reset wipes those keys and turns USB debugging off — re-enable both after setup.
 
-### Will a factory reset always fix it?
+### Will a factory reset fix it?
 
-**Not always.** It worked here. If it does not work, the next step is a full firmware flash with a wipe (LMSA with factory reset, or `fastboot`), then service. See [`04-fixes.md`](04-fixes.md).
+**No.** It stopped the loop for about three hours on the reference device, then the loop
+returned. A reset cannot fix corrupt modem NV because it does not touch `modemst1/2`. It is
+still useful for clearing your data and buying a stable window to back up. See
+[`04-fixes.md`](04-fixes.md).
 
 ### Is it a hardware fault?
 
-**No evidence of that here.** The phone was stable in recovery, both SIMs had worked hours earlier, and the crash was a userspace `SIGSEGV` in a vendor library. Hardware becomes the suspect only if the loop persists on clean stock firmware, or if it also loops in recovery/bootloader.
+**Not necessarily — and on the reference device it was not.** The cause was corrupt modem
+**NV data**, fixed by erasing `modemst1`/`modemst2`. The crash was a userspace `SIGSEGV`, but
+it was caused by the modem asserting underneath it.
+
+Hardware becomes the suspect only if the NV erase **and** a `radio.img` reflash both fail, or
+if the modem crash counter climbs again shortly after every repair. In that case the likely
+candidates are the UFS/eMMC block holding `modemst`, the modem DSP, or the PMIC rail.
+
+### Can I fix it without unlocking the bootloader?
+
+**No.** `fastboot erase modemst1/modemst2` is refused while the bootloader is locked. The
+unlock is what makes the repair possible. Motorola only unlocks retail units — see
+[unlocking](12-confirmed-fix-nv-repair.md#unlocking-the-bootloader).
+
+### What do I lose by unlocking the bootloader?
+
+- **All data** — the unlock wipes the device.
+- **Warranty** — it is void.
+- **Verified boot** — `verifiedbootstate` becomes `orange` instead of `green`.
+- **Some apps** — Play Integrity / banking apps and Google Wallet may refuse to run.
+- **Widevine** — may drop from L1 to L3, capping streaming at SD.
+
+What you do **not** lose: the IMEI (the NV rebuild restores it from `fsg`), OTA updates on a stock ROM, or the ability to use the phone normally.
+
+### Can I relock the bootloader afterwards?
+
+**Do not**, unless you have fully restored a stock, signed boot chain. Relocking a device with a modified or non-stock boot image **hard-bricks** it. On the reference device the bootloader stayed unlocked, which is the normal state after this repair.
 
 ### Is my phone under warranty? Should I use the service centre?
 
-If it is under warranty and you are uncomfortable wiping it, **use the service centre first** — a reset is free but irreversible for data. If the reset does not fix it, warranty repair is the right path. Opening the device yourself voids warranty.
+If it is under warranty and you are uncomfortable wiping it, **use the service centre first** — a factory reset is free but irreversible for data, and it will not fix corrupt modem NV anyway. If the repair is not an option for you, warranty service is the right path. Opening the device yourself voids warranty.
+
+Note that **unlocking the bootloader voids the warranty**. On the reference device the warranty had already expired, which is why unlocking was acceptable.
 
 ### Can I fix it without losing my data?
 
-**Realistically, no.** The evidence points at userdata state. The "keep my data" flash was tried and failed. Back up, then wipe. Anyone promising a data-preserving fix for this signature is guessing.
+**No.** The repair is an NV erase, and the unlock that makes it possible wipes the device.
+Back up first, then repair. Anyone promising a data-preserving fix for this signature is
+guessing.
 
 ### Why does it reboot after exactly ~2 minutes?
 
@@ -58,7 +107,7 @@ That is a **dual-SIM** device reporting slot 0 empty and slot 1 loaded. It is no
 
 ### Why does Wi-Fi say "Failed to get WLAN MAC address"?
 
-Because the Wi-Fi HAL never finished initialising — a downstream effect of `system_server` never getting a stable boot. It is not a broken Wi-Fi chip. It came back by itself after the reset.
+Because the Wi-Fi HAL never finished initialising — a downstream effect of `system_server` never getting a stable boot. It is not a broken Wi-Fi chip. It came back by itself after the modem NV repair.
 
 ### Does safe mode help?
 
@@ -66,7 +115,7 @@ Safe mode rules out third-party apps. Here the phone **still looped in safe mode
 
 ### Do the 13 package disables fix it?
 
-**No.** They reduced crashes from ~14 per boot to ~2 by removing oemhook *clients*. The modem still sends unsolicited indications. After the factory reset, all 13 were re-enabled and the phone stayed stable — proof they were never the cause.
+**No.** They reduced crashes from ~14 per boot to ~2 by removing oemhook *clients*. The modem still asserts on its own. After the NV repair, all 13 were re-enabled and the phone stayed stable — proof they were never the cause.
 
 ### Does airplane mode fix it?
 
@@ -74,7 +123,7 @@ It **suppresses** it: no radio, no `RegRAT`/`UpdateOperator`/`DataState` events,
 
 ### Does the LMSA "no factory delete" option ever help?
 
-It can help for other problems (corrupt system image, failed OTA) where userdata is fine. It **cannot** help here, because it preserves the state that triggers the crash. If you use LMSA, choose the wipe option.
+It can help for other problems (corrupt system image, failed OTA) where userdata is fine. It **cannot** help here: it never writes `modemst1`/`modemst2`, so corrupt modem NV survives it. If you use LMSA, still choose the wipe option, but do not expect it to repair this fault.
 
 ### I have an eSIM. Will I lose it?
 
@@ -82,11 +131,15 @@ A factory reset removes eSIM profiles from the device. You will need the carrier
 
 ### Can I root and patch the library?
 
-Technically possible, practically a bad idea: the vendor partition is verified, patching breaks OTA and possibly Play Integrity, and the bug is dormant after the reset. See [what not to do](04-fixes.md#what-not-to-do).
+Technically possible, practically a bad idea: the vendor partition is verified, patching breaks OTA and possibly Play Integrity — and it treats a symptom. The `qcrilNrd` crash happens because the modem is already gone; patching the library gives you a phone that boots with no cellular. See [what not to do](04-fixes.md#what-not-to-do).
 
-### Can I install LineageOS / a custom ROM?
+### Can I install LineageOS / AxionOS / a custom ROM to fix it?
 
-Only with an unlockable bootloader. Motorola bootloader unlocking is region- and model-dependent and voids warranty. A custom ROM would replace the vendor stack entirely — which *would* remove the bug, but also the camera processing, VoLTE on some carriers, and OTA. Not a first-line fix.
+**It will not fix the modem.** A custom ROM flashes `boot`, `vendor_boot`, `dtbo` and
+`super` — it cannot reach `modemst1/2`, and it reuses Motorola's vendor blobs. If the modem is
+asserting, you get a phone that boots to the home screen with **"No service"** instead of a
+bootloop. That is a usability fallback, not a repair — and it needs the same bootloader unlock
+the real fix needs. Do the [NV repair](12-confirmed-fix-nv-repair.md) first.
 
 ### Is gnirehtet safe?
 
@@ -102,7 +155,7 @@ gnirehtet relays TCP. Play Services validates connectivity using UDP/QUIC, so it
 
 ### Can I enable USB debugging if the phone will not boot?
 
-Sometimes: the loop leaves 60–90 s of usable UI per boot. Settings → About phone → tap *Build number* 7× → Developer options → USB debugging. If that is impossible, `fastboot` still works without it, and a factory reset from recovery does not need it. See [this section](02-diagnosis.md#if-usb-debugging-is-not-enabled).
+Sometimes: the loop leaves 60–90 s of usable UI per boot. Settings → About phone → tap *Build number* 7× → Developer options → USB debugging. If that is impossible, `fastboot` still works without it — and the NV repair needs only `fastboot`, not ADB. See [this section](02-diagnosis.md#if-usb-debugging-is-not-enabled).
 
 ### Does this affect other Moto G45 units?
 
@@ -114,7 +167,7 @@ Possibly. `libmotext_inf.so` and the oemhook agent exist on other Motorola Qualc
 
 ### How do I report this to Motorola?
 
-Use the official support channel and include: model `XT2363-9`, codename `fogos`, build fingerprint, baseband version, the `libmotext_inf.so` backtrace, and the fact that a factory reset resolves it. Do not include your serial/IMEI publicly.
+Use the official support channel and include: model `XT2363-9`, codename `fogos`, build fingerprint, baseband version, the `libmotext_inf.so` backtrace, the fact that `subsys2` (modem) keeps asserting, and that erasing `modemst1`/`modemst2` fixed it. Do not include your serial/IMEI publicly.
 
 ### Is my data safe in this repository?
 

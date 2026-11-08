@@ -1,17 +1,22 @@
 > [!IMPORTANT]
 > **Repo ini ditulis oleh AI.** Diagnosis, skrip, dan dokumentasi dibuat oleh pemilik repo bersama **agen AI** (DeepSeek V4.1 Flash via OpenCode), lalu diperiksa terhadap log yang direkam.
 >
-> **Mau debug HP sendiri pakai repo ini?** Berikan **seluruh repo dan dokumentasinya** — `README.md`, `README.id.md`, `docs/00`–`docs/11`, `evidence/`, dan `scripts/` — ke asisten AI kamu, lalu minta ia mengikuti panduan ini langkah demi langkah. Setelah itu **selalu cek** setiap klaimnya dengan `getprop` dan `logcat` sebelum menjalankan apa pun. Anggap output AI sebagai titik awal yang kuat, bukan otoritas.
+> **Mau debug HP sendiri pakai repo ini?** Berikan **seluruh repo dan dokumentasinya** — `README.md`, `README.id.md`, `docs/00`–`docs/12`, `evidence/`, dan `scripts/` — ke asisten AI kamu, lalu minta ia mengikuti panduan ini langkah demi langkah. Setelah itu **selalu cek** setiap klaimnya dengan `getprop` dan `logcat` sebelum menjalankan apa pun. Anggap output AI sebagai titik awal yang kuat, bukan otoritas.
 
 # Moto G45 5G bootloop — diagnosis lengkap, perbaikan, dan panduan pemulihan
 
 **Bahasa Indonesia** · [English](README.md)
 
 **Perangkat:** Motorola Moto G45 5G · `XT2363-9` · codename **`fogos`** · Snapdragon 6s Gen 3 (`SM6375`)
-**Gejala:** HP restart sendiri setiap **~2 menit**, terus-menerus, dan tetap terjadi setelah tiga kali flash firmware berbeda
-**Akar masalah:** **use-after-free di library oemhook proprietary Motorola**, dipicu oleh **state modem/telephony lama di `/data`**
-**Yang benar-benar memperbaiki:** **factory reset** — bukan OTA, bukan firmware full terbaru, bukan build security patch terbaru, bukan menonaktifkan package
-**Status:** stabil setelah dua kali factory reset berturut-turut, nol crash, 5G + VoLTE jalan (diverifikasi lewat beberapa kali reboot)
+**Gejala:** HP restart sendiri setiap **~2 menit**, terus-menerus, dan tetap terjadi setelah tiga kali flash firmware dan dua kali factory reset
+**Akar masalah:** **NV modem rusak di `modemst1` / `modemst2`** — modem gagal cek konsistensi tiap boot, dan crash `qcrilNrd` hanyalah gejalanya
+**Yang benar-benar memperbaiki:** **menghapus `modemst1` + `modemst2`** setelah bootloader di-unlock, sehingga modem membangun ulang NV dari `fsg`
+**Status:** stabil, nol crash modem, data LTE dan suara jalan, IMEI utuh — diverifikasi pada boot pertama setelah perbaikan, lalu dipantau terus-menerus
+
+> **Koreksi (2026-11-08).** Versi sebelumnya repo ini menyebut factory reset sebagai perbaikan dan
+> state `/data` lama sebagai pemicu. Itu **salah** — reset hanya bertahan sekitar tiga jam lalu
+> loop kembali. Perbaikan sebenarnya ada di
+> [`docs/12-confirmed-fix-nv-repair.md`](docs/12-confirmed-fix-nv-repair.md).
 
 Repo ini adalah tulisan yang sudah disanitasi dan bisa direproduksi dari satu perangkat: apa yang rusak, kenapa, apa yang kami coba, apa yang berhasil, apa yang **tidak**, dan cara melindungi data sebelum wipe.
 
@@ -31,14 +36,14 @@ Ini bukan perbaikan yang cukup dilakukan di HP saja. Kamu butuh **PC** dan **kab
 | **USB debugging + "Always allow" + screen lock dimatikan** | Jendela boot hanya 1,5–3 menit; buka kunci HP makan waktu. Set lock ke **None** sementara |
 | **Port USB langsung** (tanpa hub/dock) | Hub memutus koneksi di tengah flash |
 | **Internet di PC** + **disk kosong 30–60 GB** | Platform-Tools, gnirehtet, firmware 2–5 GB, backup |
-| **HP terisi > 50 %** | Boot pertama setelah reset bisa 15 menit |
+| **HP terisi > 50 %** | Boot pertama setelah erase NV bisa beberapa menit |
 | **Password akun Google** | Factory Reset Protection tetap berlaku walau tanpa screen lock |
 | **PIN screen lock diketahui** | Kamu butuh untuk mematikan lock, dan memasangnya lagi nanti |
 | **Seed 2FA sudah diekspor, backup sudah selesai** | Wipe menghapusnya permanen |
 
 **Checklist lengkap, driver, troubleshooting kabel, dan daftar "apa saya sudah siap?":** [`docs/00-requirements.md`](docs/00-requirements.md)
 
-> Kamu **tidak** butuh root, bootloader unlocked, custom ROM, atau tool berbayar.
+> Kamu **tidak** butuh root, custom ROM, atau tool berbayar. Kamu **butuh** bootloader yang bisa di-unlock — `fastboot erase modemst1/modemst2` ditolak selama terkunci.
 
 ---
 
@@ -46,12 +51,13 @@ Ini bukan perbaikan yang cukup dilakukan di HP saja. Kamu butuh **PC** dan **kab
 
 | # | Lakukan ini | Kenapa |
 |---|---|---|
-| 1 | **Backup dulu** → [`docs/06-backup.md`](docs/06-backup.md) | Factory reset menghancurkan `/data`, termasuk kunci dekripsi WhatsApp dan seed authenticator 2FA |
+| 1 | **Backup dulu** → [`docs/06-backup.md`](docs/06-backup.md) | Unlock bootloader menghapus `/data`, termasuk kunci dekripsi WhatsApp dan seed authenticator 2FA |
 | 2 | Pastikan ini *bug yang sama* → [`docs/01-symptoms.md`](docs/01-symptoms.md) | Reboot loop ~2 menit dengan `qcrilNrd` di crash buffer adalah sidik jarinya |
 | 3 | Dapatkan internet tanpa Wi-Fi/SIM → [`docs/07-internet-without-wifi-or-sim.md`](docs/07-internet-without-wifi-or-sim.md) | `gnirehtet` melakukan reverse tether lewat USB — tanpa root, tanpa Wi-Fi, tanpa SIM |
-| 4 | **Factory reset** (Recovery → Wipe data/factory reset) | Inilah yang menghentikan loop. ~5 menit |
-| 5 | Masih loop? → flash full via LMSA **dengan opsi "factory reset" dicentang** | Mengganti image vendor/modem *dan* menghapus userdata |
-| 6 | Verifikasi dengan [`scripts/adb/verify-stability`](scripts/adb/) | Stabil = 0 crash `qcrilNrd` setelah uptime 10+ menit |
+| 4 | **Catat IMEI** — tekan `*#06#` dan tulis kedua nomornya | Perbaikan ini menghapus NV store yang menyimpan IMEI |
+| 5 | **Unlock bootloader** → [`docs/12`](docs/12-confirmed-fix-nv-repair.md#unlocking-the-bootloader) | `erase modemst1/2` ditolak selama bootloader terkunci |
+| 6 | **Hapus NV modem** → `fastboot erase modemst1` lalu `fastboot erase modemst2` | **Inilah perbaikannya.** Modem membangun ulang NV dari partisi `fsg` |
+| 7 | Verifikasi → `crash_count` tetap `0`, baseband ada, IMEI tidak berubah | Satu boot bersih bukan bukti — pantau 30 menit, lalu reboot sekali |
 
 Kalau kamu punya 30 detik, baca [penjelasan satu layar](docs/03-root-cause.md#the-short-version).
 
@@ -61,9 +67,9 @@ Kalau kamu punya 30 detik, baca [penjelasan satu layar](docs/03-root-cause.md#th
 
 ![Android 15, build V1UGS35H.75-14-9-3-1-4, security patch 1 September 2026](assets/android15-latest-build.png)
 
-Setelah reset: **Android 15**, build `V1UGS35H.75-14-9-3-1-4`, security patch **1 September 2026**, 5G + VoLTE terdaftar, nol crash `qcrilNrd`.
+Setelah perbaikan: **Android 15**, build `V1UGS35H.75-14-9-3-1-4`, security patch **1 September 2026**, baseband `M6375_HI434_03.562.01.121R`, `IN_SERVICE` di LTE, data dan suara jalan, **nol crash modem**.
 
-HP ini melewati **tiga kali flash firmware** sebelum reset — update Android 15, firmware full terbaru lewat Motorola/Lenovo Software Fix, dan build security patch terbaru — dan tetap loop di semuanya. Hanya menghapus userdata yang memperbaikinya.
+HP ini melewati **tiga kali flash firmware** dan **dua kali factory reset** sebelum perbaikan sebenarnya. Semuanya tidak menyentuh `modemst1`/`modemst2`. Menghapus kedua partisi itu — yang butuh bootloader unlocked — adalah yang memulihkannya.
 
 ---
 
@@ -83,18 +89,19 @@ Signal:   SIGSEGV, SEGV_MAPERR, fault addr 0xffffffffffffff02
 #04  libc.so          __pthread_start
 ```
 
-Sebuah RIL token yang sudah di-*free* (`0xffffffffffffff02` = `-254`, pointer "beracun" klasik) di-dereference. `qcrilNrd` mati. `system_server` menunggu Binder call yang tidak akan pernah kembali. Setelah ~60 detik **watchdog** mematikan sistem dan HP reboot. Ulang setiap 2 menit.
+Sebuah token yang merujuk koneksi modem yang sudah tidak ada (`0xffffffffffffff02` = `-254`, kode error yang dipakai sebagai pointer) di-dereference. `qcrilNrd` mati. `system_server` menunggu Binder call yang tidak akan pernah kembali. Setelah ~60 detik **watchdog** mematikan sistem dan HP reboot. Ulang setiap 2 menit.
 
-Bug ini *dormant* di HP sehat. Dia hanya menyala saat modem mengirim indikasi oemhook tak diminta (`RegRAT`, `UpdateOperator`, `DataState`, `APMState`, `VoiceCallCount`) dalam state yang tidak diharapkan library. Di kasus ini state itu berasal dari **data telephony lama yang terbawa dari sebelum crash loop dimulai**.
+Crash ini **gejala**. Di bawahnya, database NV modem (`modemst1`/`modemst2`) rusak, jadi modem gagal cek konsistensi tiap boot dan layanan QMI-nya hilang. Library lalu mem-dereference token untuk koneksi yang sudah lenyap.
 
 Karena itu:
 
-- **OTA Android 15 tidak membantu** — partisi vendor dan firmware modem tidak berubah.
-- **Flash LMSA "no factory delete" tidak membantu** — tool itu sengaja mempertahankan `/data`, dan pemicunya ada di `/data`.
-- **Menonaktifkan 13 package hanya menurunkan frekuensi crash** — aplikasi adalah *pengirim* lalu lintas oemhook, bukan *penyebabnya*.
-- **Factory reset memperbaikinya** — dia menghapus `/data/vendor/radio`, state carrier/APN, dan reprovision stack modem saat boot pertama.
+- **OTA Android 15 tidak membantu** — ia mengganti image, bukan NV modem.
+- **Flash LMSA tidak membantu** — alasannya sama; ia menulis ulang partisi yang bukan sumber NV modem.
+- **Menonaktifkan 13 package hanya menurunkan frekuensi crash** — aplikasi adalah *pengirim* lalu lintas oemhook, bukan penyebabnya.
+- **Factory reset hanya menunda** — ia reprovision stack modem, yang menutupi NV rusak selama beberapa jam, tapi tidak pernah menyentuh `modemst1/2`.
+- **Menghapus `modemst1` + `modemst2` memperbaikinya** — modem membangun ulang database NV yang bersih dari partisi `fsg`.
 
-Analisis lengkap, termasuk kenapa penjelasan populer "factory reset membersihkan NVRAM modem" tidak tepat: **[`docs/03-root-cause.md`](docs/03-root-cause.md)**.
+Analisis lengkap, termasuk kenapa factory reset *tampak* berhasil dan kenapa sebenarnya tidak: **[`docs/03-root-cause.md`](docs/03-root-cause.md)**.
 
 ---
 
@@ -107,7 +114,7 @@ docs/
   00-requirements.md          PC, kabel, ADB, driver, akun, checklist pra-terbang
   01-symptoms.md              bedakan bootloop ini vs. penyebab lain
   02-diagnosis.md             kumpulkan bukti dengan ADB; baca tombstone
-  03-root-cause.md            bug-nya, pemicunya, kenapa tiap perbaikan berperilaku begitu
+  03-root-cause.md            mekanika crash, dan teori yang salah (disimpan sebagai catatan)
   04-fixes.md                 perbaikan berurut + langkah pasti + apa yang dihancurkan
   05-tutorial.md              panduan bahasa sederhana, dari awal sampai akhir
   06-backup.md                apa yang harus dibackup, apa yang tidak bisa diselamatkan, caranya
@@ -116,6 +123,7 @@ docs/
   09-faq.md                   "bisa kambuh?", garansi, root, LineageOS...
   10-evidence-index.md        isi evidence/ dan cara sanitasinya
   11-ai-assisted-debugging.md cara debug pakai AI + ADB, dan kesalahan yang kami lakukan
+  12-confirmed-fix-nv-repair.md  PERBAIKANNYA: unlock, hapus modemst1/2, verifikasi
 scripts/
   adb/                        .ps1 + .sh portabel: collect, disable, re-enable, verify
   windows/                    tether keeper + watchdog (path bisa diatur)
@@ -129,12 +137,15 @@ LICENSE                       MIT (kode) / CC BY 4.0 (tulisan)
 ## Versi singkat perbaikannya
 
 ```text
-Recovery (Power + Volume Down → "Recovery mode")
-  → Wipe data/factory reset
-  → Reboot system now
+1. Tekan *#06# dan catat kedua IMEI.
+2. Unlock bootloader (kode unlock Motorola; HP ter-wipe).
+3. fastboot erase modemst1
+   fastboot erase modemst2
+   fastboot reboot
+4. Tekan *#06# lagi — IMEI harus sama.
 ```
 
-Semua isi repo ini ada karena kalimat itu tidak berguna kalau kamu belum backup, tidak bisa memastikan loop-mu bug yang sama, atau reset-nya tidak berhasil.
+Semua isi repo ini ada karena urutan itu tidak berguna kalau kamu belum backup, tidak bisa memastikan loop-mu bug yang sama, atau erase-nya tidak berhasil.
 
 ---
 
@@ -169,7 +180,7 @@ Ini alur di balik [`evidence/timeline.txt`](evidence/timeline.txt):
 6. KOREKSI    Kalau prediksi gagal, buang hipotesisnya. Jangan ditambal.
 ```
 
-Langkah 6 yang paling penting. Hipotesis pertama kami (NVRAM modem) salah, dan perbaikan baru berhasil setelah hipotesis itu dibuang.
+Langkah 6 yang paling penting. Hipotesis kedua kami (state `/data` lama) salah: factory reset cuma menunda loop sekitar tiga jam. Perbaikan baru berhasil setelah hipotesis itu dibuang dan kami kembali ke penyebab sebenarnya — NV modem yang rusak.
 
 ### Yang perlu direkam dulu
 
@@ -234,17 +245,17 @@ Checklist lengkap: [`PRIVACY.md`](PRIVACY.md).
 
 ### Kesalahan yang kami lakukan (jangan diulang)
 
-1. **Flash firmware dan berharap `/data` ikut bersih.** Tiga flash gagal karena flash tidak menghapus userdata. Kalau bug-nya di `/data`, flash tidak akan menyelesaikannya.
-2. **Pakai LMSA "no factory delete".** Terasa lebih aman, tapi justru mempertahankan pemicunya. Flash yang mempertahankan data = tidak melakukan apa-apa untuk kasus ini.
-3. **Percaya "factory reset membersihkan NVRAM modem".** Recovery tidak menyentuh `modemst1`/`modemst2`. Yang berubah adalah `/data/vendor/radio` dan state telephony.
+1. **Menyimpulkan pemicunya ada di `/data`.** Ini kesalahan yang mahal. Factory reset tampak berhasil, tapi loop kembali sekitar tiga jam kemudian. Penyebabnya NV modem yang rusak, bukan `/data`. Pelajarannya: perbaikan yang bertahan beberapa jam bukan perbaikan — uji lewat reboot dan lewat hari.
+2. **Pakai LMSA "no factory delete".** Terasa lebih aman, tapi pemicunya memang bukan di `/data`, jadi opsi itu tidak berpengaruh. Tool ini juga tidak pernah menyentuh `modemst1/2`.
+3. **Mengoreksi mitos "factory reset membersihkan NVRAM modem" secara berlebihan.** Mitos itu tidak tepat (recovery memang tidak menyentuh `modemst1`/`modemst2`), tapi kami lalu menyimpulkan NVRAM modem tidak mungkin terlibat — padahal justru itulah penyebabnya.
 4. **Menganggap menonaktifkan package sebagai solusi.** Crash melambat, bukan hilang. Aplikasi cuma pengirim, bukan penyebab.
 5. **Balapan dengan `logcat`.** Jendela 2 menit bikin crash lewat terus. Solusinya: ambil tombstone yang persisten.
 6. **Menghabiskan jendela boot untuk buka layar kunci.** PIN/pattern membuat `/data` tetap terenkripsi sampai unlock, jadi ADB tidak bisa dipakai. Set lock ke **None** sementara.
 7. **Tidak mencentang "Always allow from this computer".** Setiap reboot harus authorize ulang — tidak mungkin dilakukan dalam 2 menit.
-8. **Pernah mempertimbangkan `fastboot erase modemst1/modemst2`.** Bisa merusak provisioning IMEI permanen. Jangan.
+8. **Menolak mencoba `fastboot erase modemst1/modemst2`.** Justru ini perbaikannya. Risiko IMEI nyata tapi bisa dikelola: catat IMEI dulu, erase, lalu pastikan tidak berubah.
 9. **Percaya angka success rate anekdot.** "~60%" dan "~90%" di draf awal itu karangan dari forum, bukan pengukuran. Kalau tidak diukur, bilang anekdot — atau hapus.
 10. **Mengira SIM/data/Wi-Fi mati bersamaan = hardware rusak.** Semuanya bergantung pada `system_server` + telephony; `qcrilNrd` yang macet menjatuhkan semuanya sekaligus. Satu penyebab, banyak gejala.
-11. **Backup terlambat.** Kunci WhatsApp dan seed 2FA ada di `/data` dan hilang permanen saat reset. Backup dulu: [`docs/06-backup.md`](docs/06-backup.md).
+11. **Backup terlambat.** Kunci WhatsApp dan seed 2FA ada di `/data` dan hilang permanen saat unlock/reset. Backup dulu: [`docs/06-backup.md`](docs/06-backup.md).
 
 Panduan lengkap (English): [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assisted-debugging.md).
 
@@ -254,9 +265,9 @@ Panduan lengkap (English): [`docs/11-ai-assisted-debugging.md`](docs/11-ai-assis
 
 Flash, wipe, dan `pm disable-user` bisa brick perangkat atau membatalkan garansi. Panduan ini diberikan **apa adanya, tanpa jaminan**. Kamu bertanggung jawab atas perangkat dan datamu sendiri.
 
-- Factory reset **tidak bisa dibatalkan** untuk data di perangkat. Backup dulu.
+- Factory reset dan unlock bootloader **tidak bisa dibatalkan** untuk data di perangkat. Backup dulu.
 - Menonaktifkan package di [`scripts/adb/debloat-optional.txt`](scripts/adb/debloat-optional.txt) bisa merusak VoLTE, panggilan darurat, atau OTA. Itu **opsional dan bisa dikembalikan**.
-- Kalau HP masih garansi dan reset tidak membantu, pakai service center — jangan buka perangkatnya.
+- Kalau HP masih garansi dan perbaikan ini tidak membantu, pakai service center — jangan buka perangkatnya.
 
 ---
 

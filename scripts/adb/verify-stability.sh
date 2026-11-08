@@ -17,6 +17,8 @@ up="${uptime_raw%% *}"
 
 crash_log="$(sh_ logcat -d -b crash)"
 crashes="$(printf '%s' "$crash_log" | grep -c qcrilNrd)"
+modem_cc="$(sh_ cat /sys/bus/msm_subsys/devices/subsys2/crash_count)"
+baseband="$(sh_ getprop gsm.version.baseband)"
 sim="$(sh_ getprop gsm.sim.state)"
 net="$(sh_ getprop gsm.network.type)"
 bootreason="$(sh_ getprop ro.boot.bootreason)"
@@ -42,6 +44,12 @@ check "Uptime >= ${MIN_UP}s" "${up}s" "$p"
 [ "$crashes" -eq 0 ] && p=1 || p=0
 check "qcrilNrd crashes == 0" "$crashes" "$p"
 
+[ "$modem_cc" = "0" ] && p=1 || p=0
+check "modem crash_count == 0" "$modem_cc" "$p"
+
+[ -n "$baseband" ] && p=1 || p=0
+check "Baseband present" "$baseband" "$p"
+
 case "$sim" in *LOADED*) p=1;; *) p=0;; esac
 check "SIM loaded" "$sim" "$p"
 
@@ -60,5 +68,5 @@ if [ "$fail" -eq 0 ]; then
   exit 0
 fi
 echo "FAIL - $fail check(s) failed."
-echo "If qcrilNrd is crashing, see docs/01-symptoms.md and docs/04-fixes.md"
+echo "If the modem crash counter is climbing, see docs/12-confirmed-fix-nv-repair.md"
 exit 1

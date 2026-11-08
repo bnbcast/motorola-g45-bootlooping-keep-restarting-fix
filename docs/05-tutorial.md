@@ -30,13 +30,13 @@ The full checklist is in [`00-requirements.md`](00-requirements.md). The short v
 
 Optional but recommended: **a second screen or phone** — you will be reading this guide while the phone is down.
 
-> You do **not** need root, an unlocked bootloader, a custom ROM, or a paid tool.
+> You do **not** need root, a custom ROM, or a paid tool. You **do** need an unlockable bootloader — the fix (`erase modemst1/2`) is refused while it is locked.
 
 ---
 
 ## Phase 0 — Do not skip this: back up
 
-**A factory reset deletes everything in `/data`: photos in internal storage, WhatsApp chats, SMS, call logs, app logins, 2FA authenticator seeds, downloaded files.**
+**Unlocking the bootloader deletes everything in `/data`** (and so does a factory reset): photos in internal storage, WhatsApp chats, SMS, call logs, app logins, 2FA authenticator seeds, downloaded files.
 
 If the phone boots for at least 30 seconds at a time, you can copy files. If it does not, read [`06-backup.md`](06-backup.md#when-the-phone-barely-boots) for the MTP/recovery tricks.
 
@@ -124,17 +124,38 @@ Caveats and the automated keeper script: [`07-internet-without-wifi-or-sim.md`](
 
 ---
 
-## Phase 3 — Factory reset (10 min + first boot)
+## Phase 3 — Unlock the bootloader and erase the modem NV (30–60 min + first boot)
+
+> **This is the fix.** A factory reset is **not** — it held for about three hours on the reference
+> device and then the loop returned. Do not skip to the reset because it is faster.
+
+**Before you start:** dial `*#06#` and write both IMEIs down. The repair rebuilds the NV store
+that holds them, and you must be able to prove they survived.
 
 1. Unplug USB. Power the phone **off**.
 2. Hold **Power + Volume Down** until the bootloader screen appears.
-3. Volume Down → **Recovery mode** → Power.
-4. At the "No command" robot: hold **Power**, press **Volume Up** once, release both.
-5. **Wipe data/factory reset** → confirm. (Volume keys move, Power selects.)
-6. **Reboot system now.**
-7. **Wait.** First boot can take 15 minutes. It may show the Motorola logo for a long time, then the setup wizard. Do not power-cycle it.
+3. Confirm the bootloader state:
 
-> **Checkpoint:** you reach the "Welcome / Let's go" setup screen.
+   ```bash
+   fastboot devices
+   fastboot getvar all | findstr securestate      # expect: flashing_unlocked
+   ```
+
+   If it says `flashing_locked`, unlock first — the full procedure is in
+   [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md#unlocking-the-bootloader).
+   The unlock **wipes the phone**, which is why Phase 0 comes first.
+4. Erase both NV stores, one at a time. Each must print `OKAY`:
+
+   ```bash
+   fastboot erase modemst1
+   fastboot erase modemst2
+   fastboot reboot
+   ```
+5. **Wait.** First boot takes several minutes while the modem rebuilds NV from `fsg`.
+
+> **Checkpoint:** the phone reaches setup, and `adb shell getprop gsm.version.baseband` is not empty.
+
+Full detail, evidence and failure modes: [`12-confirmed-fix-nv-repair.md`](12-confirmed-fix-nv-repair.md).
 
 ---
 
@@ -143,18 +164,20 @@ Caveats and the automated keeper script: [`07-internet-without-wifi-or-sim.md`](
 1. Complete setup. Connect to Wi-Fi **or** skip it if you must.
 2. **Do not restore a full device backup yet.** Especially not an "old phone clone" that restores system settings.
 3. Sign in to Google. Let it restore **contacts and apps** only if you trust the source.
-4. Leave the phone on the charger, screen on, for **20–30 minutes**.
+4. Dial `*#06#` — **both IMEIs must match what you wrote down.** If they are blank or different, stop and read the failure table in [`12`](12-confirmed-fix-nv-repair.md#if-it-does-not-work).
+5. Leave the phone on the charger, screen on, for **20–30 minutes**.
 
 Then verify:
 
 ```powershell
 adb shell "cat /proc/uptime"
 adb shell "logcat -d -b crash | grep -c qcrilNrd"
+adb shell "cat /sys/bus/msm_subsys/devices/subsys2/crash_count"
 adb shell getprop gsm.sim.state
 adb shell getprop gsm.network.type
 ```
 
-Expected: uptime climbing past 1200 s, crash count **0**, SIM `LOADED`, network `LTE`/`NR`.
+Expected: uptime climbing past 1200 s, crash count **0**, `crash_count` **0**, SIM `LOADED`, network `LTE`/`NR`.
 
 Or run the script:
 
@@ -189,8 +212,8 @@ Wait for it to come back, then leave it for **15+ minutes** and verify again.
 | Contacts | ✅ | Google sync / `.vcf` |
 | SMS, call log | ✅ | SMS Backup & Restore |
 | App logins | ✅ | Reinstall from Play Store, sign in |
-| **System settings / full `/data` clone** | ❌ | Can reintroduce the stale telephony state |
-| **`/data/vendor/radio`, `telephony.db`** | ❌ | Directly reintroduces the trigger |
+| **System settings / full `/data` clone** | ⚠️ | Not the cause of this loop, but it can bring back unrelated telephony state |
+| **`/data/vendor/radio`, `telephony.db`** | ❌ | Restore only if you have a specific reason; unrelated to the modem NV fix |
 | 2FA seeds | ✅ | Import into the authenticator app |
 
 Details: [`06-backup.md`](06-backup.md#restoring-safely).
@@ -220,8 +243,11 @@ Read [`08-hardening.md`](08-hardening.md) before doing this.
 
 | Situation | Next step |
 |---|---|
-| Still loops after reset | [Fix 2 — LMSA with factory reset](04-fixes.md#fix-2--lmsa-rescue-with-factory-reset) |
-| Loops in recovery too | Hardware → [service centre](04-fixes.md#fix-4--service-centre) |
+| Still loops after the NV erase | [Fix 2 — flash `radio.img`, then erase NV again](04-fixes.md#fix-2--flash-the-modem-firmware-then-erase-nv-again) |
+| Cannot unlock the bootloader | Not eligible for the repair → [service centre](04-fixes.md#fix-6--service-centre) |
+| Loops in recovery too | Hardware → [service centre](04-fixes.md#fix-6--service-centre) |
+| Baseband present but `crash_count` climbs | Modem firmware or hardware → Fix 2, then service centre |
+| **IMEI blank or changed** | **Stop.** `fsg` rebuild failed → [service centre](04-fixes.md#fix-6--service-centre) |
 | Stable but no mobile data | Check APN, reseat SIM, `settings get global mobile_data`; see [FAQ](09-faq.md) |
 | Stable but no Wi-Fi | `adb shell cmd wifi set-wifi-enabled enabled`, reboot; if `wlan0` is missing, LMSA |
 | Phone asks for the old PIN after reset | Normal on some builds; use your Google account / last PIN |
@@ -243,10 +269,13 @@ Day 1  14:49  phone healthy, 2 SIMs, LTE
 Day 2  01:38  Android 15 OTA appears, stalls
        18:00  Software Fix / LMSA, latest full firmware → loop persists
       ~19:00  latest security-patch build (…-9-13) → loop persists
-       20:00  factory reset #1 → stable
+       20:00  factory reset #1 → stable for ~3 hours
        21:00  27 min uptime, 0 crashes, LTE, all packages re-enabled
-      ~22:00  factory reset #2 to confirm → still stable
-Day 3         reboot test, 18+ min, 0 crashes → closed
+      ~23:00  loop returns → factory reset disproved as a fix
+Day 3         bootloader unlocked (wipes the phone)
+              fastboot erase modemst1 + modemst2 → reboot
+              baseband back, LTE + voice working, IMEI intact
+              subsys2 crash_count = 0, monitored continuously without a reboot
 ```
 
-The shape is the lesson: **three images failed, one wipe worked.**
+The shape is the lesson: **three images and two factory resets failed; erasing the modem NV worked.**

@@ -38,6 +38,8 @@ if ($uptimeRaw -match '^(\d+)') { $upSec = [int]$matches[1] }
 $crashLog = Sh "logcat -d -b crash"
 $crashCount = ([regex]::Matches($crashLog, 'qcrilNrd')).Count
 
+$modemCc = Sh "cat /sys/bus/msm_subsys/devices/subsys2/crash_count"
+$baseband = Sh "getprop gsm.version.baseband"
 $sim = Sh "getprop gsm.sim.state"
 $net = Sh "getprop gsm.network.type"
 $bootReason = Sh "getprop ro.boot.bootreason"
@@ -47,6 +49,8 @@ $http = Sh "curl -s -m 6 -o /dev/null -w '%{http_code}' http://connectivitycheck
 $checks = @(
     [pscustomobject]@{ Name = "Uptime >= ${MinUptime}s";  Value = "$upSec s";     Pass = ($upSec -ge $MinUptime) },
     [pscustomobject]@{ Name = "qcrilNrd crashes == 0";     Value = "$crashCount";  Pass = ($crashCount -eq 0) },
+    [pscustomobject]@{ Name = "modem crash_count == 0";    Value = $modemCc;       Pass = ($modemCc.Trim() -eq '0') },
+    [pscustomobject]@{ Name = "Baseband present";          Value = $baseband;      Pass = (-not [string]::IsNullOrWhiteSpace($baseband)) },
     [pscustomobject]@{ Name = "SIM loaded";                Value = $sim;           Pass = ($sim -match 'LOADED') },
     [pscustomobject]@{ Name = "Network type present";      Value = $net;           Pass = (-not [string]::IsNullOrWhiteSpace($net)) },
     [pscustomobject]@{ Name = "Default network != none";   Value = $defaultNet;    Pass = ($defaultNet -and $defaultNet -notmatch 'none') },
@@ -67,5 +71,5 @@ if ($failed.Count -eq 0) {
 }
 
 Write-Host ("FAIL - {0} check(s) failed." -f $failed.Count) -ForegroundColor Red
-Write-Host "If qcrilNrd is crashing, see docs/01-symptoms.md and docs/04-fixes.md" -ForegroundColor Yellow
+Write-Host "If the modem crash counter is climbing, see docs/12-confirmed-fix-nv-repair.md" -ForegroundColor Yellow
 exit 1
