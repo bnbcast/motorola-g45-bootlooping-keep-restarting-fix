@@ -9,6 +9,9 @@ The raw material behind every claim in this repository, sanitised. Full descript
 | [`../evidence/device-snapshot-sanitized.txt`](../evidence/device-snapshot-sanitized.txt) | What was the device state before and after the fix? |
 | [`../evidence/tether-log-sanitized.txt`](../evidence/tether-log-sanitized.txt) | How bad was the loop, and did USB tethering actually work? |
 | [`../evidence/timeline.txt`](../evidence/timeline.txt) | What happened, in what order, with pointers to proof? |
+| [`../evidence/pstore-ramoops-brownout-sanitized.txt`](../evidence/pstore-ramoops-brownout-sanitized.txt) | Dual-RF power rail voltage sag (brownout) kernel panic and IOMMU context fault traces |
+| [`14-dual-radio-coex-and-power-sag.md`](14-dual-radio-coex-and-power-sag.md) | Full reverse-engineering deep dive on dual-radio coexistence and hardware power boundaries |
+| [`15-binary-analysis-libmotext.md`](15-binary-analysis-libmotext.md) | Disassembly and permanent AArch64 NOP patch for `libmotext_inf.so` |
 
 ---
 

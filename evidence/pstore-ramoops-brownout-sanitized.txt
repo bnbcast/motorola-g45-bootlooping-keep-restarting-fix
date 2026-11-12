@@ -1,0 +1,53 @@
+# Dual-Radio Coexistence & Hardware Brownout Trace
+
+**Target Device:** Motorola Moto G45 5G (`XT2363-9`, Snapdragon 695 / SM6375)  
+**Log Source:** Kernel ramoops (`/sys/fs/pstore/console-ramoops-0`)  
+**Sanitization:** Device serial numbers, IMEI, and subscriber IDs replaced with generic tokens.
+
+---
+
+## 1. Simultaneous Dual RF Crash Trace (t = 519s)
+
+```text
+[  517.033589] batt power supply prop 4 not supported
+[  517.358717] ipa_pm activate_work_func:448 client has no callback
+[  519.067623] subsys-pil-tz: subsys_wdog_bite_irq_handler(): Watchdog bite received from modem!
+[  519.067744] subsys-pil-tz: log_failure_reason(): modem subsystem failure reason: SFR Init: wdog or kernel error suspected..
+[  519.068521] Ramdump(ramdump_microdump_modem): No consumers. Aborting..
+[  519.172420] Kernel panic - not syncing: subsys-restart: Resetting the SoC - modem crashed.
+[  519.172471] CPU: 1 PID: 65 Comm: kworker/1:1 Tainted: G S      WC        5.4.302-moto-g32275aee2c8f #1
+[  519.172487] Hardware name: fogos (DT)
+[  519.172535] Workqueue: events device_restart_work_hdlr.b17b26df8fdac73c386be223703b5996.cfi_jt
+[  519.172554] Call trace:
+[  519.172580]  dump_backtrace.cfi_jt+0x0/0x4
+[  519.172604]  show_stack+0x18/0x24
+[  519.172627]  __dump_stack+0x24/0x30
+[  519.172641]  dump_stack+0x90/0xb8
+[  519.172664]  panic+0x164/0x3d0
+[  519.172687]  subsys_remove_restart_order+0x0/0x98
+[  519.172708]  process_one_work+0x214/0x4b0
+[  519.172724]  worker_thread+0x26c/0x4b8
+[  519.172740]  kthread+0x150/0x188
+[  519.172761]  ret_from_fork+0x10/0x18
+```
+
+---
+
+## 2. Touch SPI Controller Freeze Trace (t = 40.2s - 42.3s)
+
+```text
+[  40.256146] ILITEK_TDDI spi0.1: SPI transfer failed: -110
+[  40.928051] subsys-pil-tz: wait_for_err_ready(): [adsp]: Error ready timed out
+[  42.351420] Kernel panic: Powerup error: adsp!
+```
+
+---
+
+## 3. Wi-Fi IOMMU Unmapped DMA Context Fault (t = 416s)
+
+```text
+[ 416.855805] qsmmuv500-tbu c705000.anoc_1_tbu: ECATS generated a fault interrupt! FSR = 402, SID=0x80
+[ 416.856009] arm-smmu c600000.apps-smmu: Unhandled context fault: iova=0x400140000, cb=10, fsr=0x402
+[ 416.856120] arm-smmu c600000.apps-smmu: SOFTWARE TABLE WALK FAILED! Looks like c600000.apps-smmu accessed an unmapped address!
+[ 424.390842] icnss2: Received early crash indication from FW
+```

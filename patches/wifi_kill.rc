@@ -1,0 +1,10 @@
+# Stability: disable Wi-Fi CNSS subsystem due to hardware failure
+on boot
+    setprop vendor.wlan.firmware.disable 1
+    stop cnss-daemon
+    write /sys/devices/platform/soc/4804000.ufshc/auto_hibern8 0
+    write /sys/devices/platform/soc/4804000.ufshc/clkscale_enable 0
+
+on property:sys.boot_completed=1
+    stop cnss-daemon
+    write /sys/devices/platform/soc/4804000.ufshc/auto_hibern8 0

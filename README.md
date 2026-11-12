@@ -210,10 +210,10 @@ The root cause (corrupt `modemst1/2`) and fix (erase both) are build-agnostic fo
 | Section | What You'll Find |
 |---------|------------------|
 | **Start Here** | [`Requirements & Pre-flight Checklist`](docs/00-requirements.md) — PC, cable, ADB, accounts, 2FA seeds, cable test |
-| **Diagnose** | [`Symptoms`](docs/01-symptoms.md) · [`Evidence Collection`](docs/02-diagnosis.md) · [`Root Cause Analysis`](docs/03-root-cause.md) |
-| **Fix & Verify** | [`Confirmed Fix: NV Repair`](docs/12-confirmed-fix-nv-repair.md) · [`Step-by-Step Tutorial`](docs/05-tutorial.md) · [`Restore Verification`](docs/13-restore-verification.md) |
+| **Diagnose** | [`Symptoms`](docs/01-symptoms.md) · [`Evidence Collection`](docs/02-diagnosis.md) · [`Root Cause Analysis`](docs/03-root-cause.md) · [`Dual-Radio Power Rail Deep Dive`](docs/14-dual-radio-coex-and-power-sag.md) |
+| **Fix & Verify** | [`Confirmed Fix: NV Repair`](docs/12-confirmed-fix-nv-repair.md) · [`Step-by-Step Tutorial`](docs/05-tutorial.md) · [`Binary Patches & Disassembly`](docs/15-binary-analysis-libmotext.md) · [`Restore Verification`](docs/13-restore-verification.md) |
 | **AI-Assisted Debugging** | [`How we used AI + ADB`](docs/11-ai-assisted-debugging.md) — prompts, mistakes, verification rules. **Give your AI this whole repo to debug your phone.** |
-| **Scripts & Evidence** | [`ADB Scripts`](scripts/adb/) (collect, verify, debloat) · [`Sanitised Logs`](evidence/) (crash signature, timeline, device snapshot) |
+| **Scripts & Evidence** | [`ADB & Recovery Scripts`](scripts/adb/) (collect, verify, emergency fail-safe) · [`Sanitised Logs & Dumps`](evidence/) (crash signatures, timeline, pstore ramoops) · [`Binary Patches`](patches/) |
 | **Safety & Legal** | [`Privacy/Redaction Checklist`](PRIVACY.md) · [`License`](LICENSE) (MIT / CC BY 4.0) · [`Disclaimer`](#disclaimer--legal) |
 
 ---
